@@ -21,7 +21,7 @@ interface CalendarEvent {
     color: string;
 }
 
-const HOUR_HEIGHT = 64; // px per hour row
+const HOUR_HEIGHT = 80; // px per hour row — 30-min events = 40px, enough for text
 const START_HOUR = 7;
 const END_HOUR = 21;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => i + START_HOUR);
@@ -142,7 +142,7 @@ function layoutEvents(events: CalendarEvent[]): LayoutEvent[] {
                 result.push({
                     ...evt,
                     top: ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT,
-                    height: Math.max((durationMin / 60) * HOUR_HEIGHT, 28),
+                    height: Math.max((durationMin / 60) * HOUR_HEIGHT, 44),
                     left: (colIdx / numCols) * 100,
                     width: (1 / numCols) * 100,
                 });
