@@ -123,6 +123,11 @@ const translations = {
         minutes: 'min',
         hours: 'horas',
         days: 'días',
+
+        // Calendar views
+        day: 'Día',
+        week: 'Semana',
+        month: 'Mes',
     },
 
     en: {
@@ -243,6 +248,11 @@ const translations = {
         minutes: 'min',
         hours: 'hours',
         days: 'days',
+
+        // Calendar views
+        day: 'Day',
+        week: 'Week',
+        month: 'Month',
     },
 } as const;
 

@@ -1,0 +1,579 @@
+/* ─── Calendar Page ─── */
+
+.content {
+    padding: var(--space-4) var(--space-6);
+    max-width: var(--max-content-width);
+    height: calc(100vh - var(--header-height));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border-light);
+    flex-shrink: 0;
+}
+
+.navButtons {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.navBtn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.navBtn:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+    border-color: var(--color-primary);
+}
+
+.todayBtn {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    transition: all var(--transition-fast);
+}
+
+.todayBtn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.dateTitle {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    text-transform: capitalize;
+    text-align: center;
+    flex: 1;
+}
+
+.viewToggle {
+    display: flex;
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    padding: 2px;
+}
+
+.viewBtn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-tertiary);
+    transition: all var(--transition-fast);
+    text-transform: capitalize;
+}
+
+.viewBtn.viewActive {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.calendarBody {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: var(--space-4);
+}
+
+/* ─── Day View ─── */
+
+.dayView {
+    min-height: 100%;
+}
+
+.timeGrid {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeRow {
+    display: flex;
+    min-height: 60px;
+    border-bottom: 1px solid var(--color-border-light);
+    position: relative;
+}
+
+.timeLabel {
+    width: 56px;
+    flex-shrink: 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    padding-top: 2px;
+    text-align: right;
+    padding-right: var(--space-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.timeSlot {
+    flex: 1;
+    position: relative;
+    border-left: 1px solid var(--color-border-light);
+    min-height: 60px;
+}
+
+/* Event blocks */
+.eventBlock {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: var(--event-top, 0px);
+    height: var(--event-height, 36px);
+    background: color-mix(in srgb, var(--event-color) 15%, var(--color-bg-surface));
+    border-left: 3px solid var(--event-color);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    border: none;
+    text-align: left;
+    z-index: 1;
+}
+
+.eventBlock:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+    z-index: 2;
+    border-left: 3px solid var(--event-color);
+}
+
+.eventTime {
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--event-color);
+    white-space: nowrap;
+}
+
+.eventTitle {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eventService {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Week View ─── */
+
+.weekView {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.weekHeader {
+    display: flex;
+    border-bottom: 2px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-surface);
+    z-index: 2;
+}
+
+.weekTimeCol {
+    width: 56px;
+    flex-shrink: 0;
+}
+
+.weekDayHeader {
+    flex: 1;
+    text-align: center;
+    padding: var(--space-2) 0;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    border-radius: var(--radius-md);
+}
+
+.weekDayHeader:hover {
+    background: var(--color-bg-hover);
+}
+
+.weekDayHeader.isToday .weekDayNum {
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weekDayName {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-weight-medium);
+}
+
+.weekDayNum {
+    display: inline-block;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.weekBody {
+    flex: 1;
+}
+
+.weekRow {
+    display: flex;
+    min-height: 60px;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.weekCell {
+    flex: 1;
+    border-left: 1px solid var(--color-border-light);
+    padding: 2px;
+    min-height: 60px;
+}
+
+.weekEvent {
+    width: 100%;
+    padding: 2px 4px;
+    margin-bottom: 1px;
+    background: color-mix(in srgb, var(--event-color) 15%, var(--color-bg-surface));
+    border-left: 2px solid var(--event-color);
+    border-radius: 2px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    transition: all var(--transition-fast);
+}
+
+.weekEvent:hover {
+    background: color-mix(in srgb, var(--event-color) 25%, var(--color-bg-surface));
+}
+
+.weekEventTime {
+    font-size: 9px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--event-color);
+}
+
+.weekEventTitle {
+    font-size: 10px;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Month View ─── */
+
+.monthView {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.monthHeader {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.monthDayName {
+    text-align: center;
+    padding: var(--space-2) 0;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.monthGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    flex: 1;
+}
+
+.monthCell {
+    min-height: 100px;
+    border-bottom: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);
+    padding: var(--space-1);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.monthCell:hover {
+    background: var(--color-bg-hover);
+}
+
+.monthCell.otherMonth {
+    opacity: 0.35;
+}
+
+.monthCell.isToday .monthCellDay {
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.monthCellDay {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: 2px;
+}
+
+.monthEvent {
+    font-size: 10px;
+    padding: 1px 4px;
+    margin-bottom: 1px;
+    background: color-mix(in srgb, var(--event-color) 12%, var(--color-bg-surface));
+    border-left: 2px solid var(--event-color);
+    border-radius: 2px;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.monthMore {
+    font-size: 10px;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+    padding-left: 4px;
+}
+
+/* ─── Event Detail Overlay ─── */
+
+.eventOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: var(--z-modal);
+    backdrop-filter: blur(2px);
+}
+
+.eventDetail {
+    position: fixed;
+    bottom: var(--space-4);
+    right: var(--space-4);
+    width: 360px;
+    background: var(--color-bg-elevated);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    z-index: calc(var(--z-modal) + 1);
+    overflow: hidden;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.detailHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.detailColor {
+    width: 4px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.detailTitle {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.detailSub {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+}
+
+.detailClose {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.detailClose:hover {
+    background: var(--color-bg-active);
+    color: var(--color-text);
+}
+
+.detailBody {
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.detailLabel {
+    color: var(--color-text-tertiary);
+}
+
+.statusDot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    text-transform: capitalize;
+}
+
+.statusDot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--status-color);
+}
+
+.detailActions {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 768px) {
+    .content {
+        padding: var(--space-3);
+    }
+
+    .toolbar {
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .dateTitle {
+        order: -1;
+        flex: 0 0 100%;
+        font-size: var(--font-size-base);
+        text-align: left;
+    }
+
+    .viewToggle {
+        flex: 1;
+    }
+
+    .viewBtn {
+        flex: 1;
+        text-align: center;
+        padding: 6px 8px;
+        font-size: var(--font-size-xs);
+    }
+
+    /* Hide week view on mobile, show day/month */
+    .weekView {
+        display: none;
+    }
+
+    .monthCell {
+        min-height: 60px;
+        padding: 2px;
+    }
+
+    .monthEvent {
+        display: none;
+        /* too small on mobile, just show dot */
+    }
+
+    .monthCellDay {
+        font-size: var(--font-size-xs);
+    }
+
+    .timeLabel {
+        width: 44px;
+        font-size: 10px;
+    }
+
+    .eventDetail {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+}
