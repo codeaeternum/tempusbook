@@ -10,7 +10,7 @@ interface NavItem {
     key: string;
     icon: string;
     path: string;
-    badge?: string; // plan badge
+    badge?: string;
 }
 
 const navItems: NavItem[] = [
@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
     const { t } = useLocale();
 
@@ -38,67 +39,105 @@ export default function Sidebar() {
         return pathname.startsWith(path);
     };
 
-    return (
-        <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
-            {/* Logo + Plan badge */}
-            <div className={styles.logoArea}>
-                <div className={styles.logo}>
-                    <div className={styles.logoIcon}>T</div>
-                    {!collapsed && <span className={styles.logoText}>TempusBook</span>}
-                </div>
-                {!collapsed && (
-                    <Link href="/dashboard/subscription" className={styles.planChip}>
-                        <span className={styles.planDot}></span>
-                        Pro Trial · 12d
-                    </Link>
-                )}
-            </div>
+    const handleNavClick = () => {
+        // Close mobile drawer on navigation
+        setMobileOpen(false);
+    };
 
-            {/* Toggle */}
+    return (
+        <>
+            {/* Mobile hamburger button */}
             <button
-                className={styles.toggle}
-                onClick={() => setCollapsed(!collapsed)}
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                className={styles.hamburger}
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open menu"
             >
-                <span className={styles.toggleIcon}>{collapsed ? '→' : '←'}</span>
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
             </button>
 
-            {/* Navigation */}
-            <nav className={styles.nav}>
-                <ul className={styles.navList}>
-                    {navItems.map((item) => (
-                        <li key={item.key}>
-                            <Link
-                                href={item.path}
-                                className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
-                                title={collapsed ? t(item.key as any) : undefined}
-                            >
-                                <span className={styles.navIcon}>{item.icon}</span>
-                                {!collapsed && (
-                                    <>
-                                        <span className={styles.navLabel}>{t(item.key as any)}</span>
-                                        {item.badge && (
-                                            <span className={styles.planBadge}>{item.badge}</span>
-                                        )}
-                                    </>
-                                )}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+            {/* Mobile overlay */}
+            {mobileOpen && (
+                <div
+                    className={styles.overlay}
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
 
-            {/* Bottom — only settings */}
-            <div className={styles.bottom}>
-                <Link
-                    href="/dashboard/settings"
-                    className={`${styles.navItem} ${isActive('/dashboard/settings') ? styles.active : ''}`}
-                    title={collapsed ? t('settings') : undefined}
+            <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${mobileOpen ? styles.mobileOpen : ''}`}>
+                {/* Logo + Plan badge */}
+                <div className={styles.logoArea}>
+                    <div className={styles.logoRow}>
+                        <div className={styles.logo}>
+                            <div className={styles.logoIcon}>T</div>
+                            {!collapsed && <span className={styles.logoText}>TempusBook</span>}
+                        </div>
+                        {/* Mobile close button */}
+                        <button
+                            className={styles.closeBtn}
+                            onClick={() => setMobileOpen(false)}
+                            aria-label="Close menu"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    {!collapsed && (
+                        <Link href="/dashboard/subscription" className={styles.planChip} onClick={handleNavClick}>
+                            <span className={styles.planDot}></span>
+                            Pro Trial · 12d
+                        </Link>
+                    )}
+                </div>
+
+                {/* Desktop toggle */}
+                <button
+                    className={styles.toggle}
+                    onClick={() => setCollapsed(!collapsed)}
+                    aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
-                    <span className={styles.navIcon}>⚙️</span>
-                    {!collapsed && <span className={styles.navLabel}>{t('settings')}</span>}
-                </Link>
-            </div>
-        </aside>
+                    <span className={styles.toggleIcon}>{collapsed ? '→' : '←'}</span>
+                </button>
+
+                {/* Navigation */}
+                <nav className={styles.nav}>
+                    <ul className={styles.navList}>
+                        {navItems.map((item) => (
+                            <li key={item.key}>
+                                <Link
+                                    href={item.path}
+                                    className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
+                                    title={collapsed ? t(item.key as any) : undefined}
+                                    onClick={handleNavClick}
+                                >
+                                    <span className={styles.navIcon}>{item.icon}</span>
+                                    {!collapsed && (
+                                        <>
+                                            <span className={styles.navLabel}>{t(item.key as any)}</span>
+                                            {item.badge && (
+                                                <span className={styles.planBadge}>{item.badge}</span>
+                                            )}
+                                        </>
+                                    )}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Bottom */}
+                <div className={styles.bottom}>
+                    <Link
+                        href="/dashboard/settings"
+                        className={`${styles.navItem} ${isActive('/dashboard/settings') ? styles.active : ''}`}
+                        title={collapsed ? t('settings') : undefined}
+                        onClick={handleNavClick}
+                    >
+                        <span className={styles.navIcon}>⚙️</span>
+                        {!collapsed && <span className={styles.navLabel}>{t('settings')}</span>}
+                    </Link>
+                </div>
+            </aside>
+        </>
     );
 }

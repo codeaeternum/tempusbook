@@ -24,6 +24,12 @@
     flex-shrink: 0;
 }
 
+.logoRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -52,14 +58,34 @@
     letter-spacing: -0.02em;
 }
 
-/* Plan chip — subtle subscription indicator */
+/* Close button (mobile only) */
+.closeBtn {
+    display: none;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.closeBtn:hover {
+    background: var(--color-bg-active);
+    color: var(--color-text);
+}
+
+/* Plan chip */
 .planChip {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
     margin-top: var(--space-2);
     margin-left: 49px;
-    /* align with text after logo icon */
     padding: 2px var(--space-2);
     font-size: 10px;
     font-weight: var(--font-weight-medium);
@@ -83,8 +109,7 @@
     flex-shrink: 0;
 }
 
-
-/* Toggle */
+/* Toggle (desktop only) */
 .toggle {
     position: absolute;
     top: 18px;
@@ -201,14 +226,81 @@
     flex-shrink: 0;
 }
 
-/* Responsive */
+/* Hamburger button (mobile only) */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: var(--z-modal);
+    width: 40px;
+    height: 40px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-shadow: var(--shadow-md);
+}
+
+.hamburgerLine {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 1px;
+}
+
+/* Mobile overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: calc(var(--z-fixed) - 1);
+    backdrop-filter: blur(2px);
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet and below: 768px */
 @media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+
+    .overlay {
+        display: block;
+    }
+
+    .toggle {
+        display: none;
+    }
+
+    .closeBtn {
+        display: flex;
+    }
+
     .sidebar {
         transform: translateX(-100%);
         box-shadow: var(--shadow-xl);
+        width: 280px;
+        transition: transform var(--transition-base);
     }
 
-    .sidebar.open {
+    .sidebar.mobileOpen {
         transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+        width: 280px;
+    }
+
+    .planChip {
+        margin-left: 0;
+        margin-top: var(--space-3);
     }
 }

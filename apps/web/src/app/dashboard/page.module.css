@@ -64,8 +64,8 @@
 .appointmentItem {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
     transition: background var(--transition-fast);
     cursor: pointer;
 }
@@ -167,22 +167,58 @@
     }
 
     .quickActions {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .actionCard {
-        flex: 1;
-        min-width: 120px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .content {
         padding: var(--space-4);
     }
 
     .statsGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        margin-bottom: var(--space-5);
+    }
+
+    .mainGrid {
+        gap: var(--space-4);
+    }
+
+    .quickActions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+    }
+
+    .actionCard {
+        padding: var(--space-4);
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2);
+    }
+
+    .cardHeader {
+        padding: var(--space-4);
+    }
+
+    .appointmentItem {
+        padding: var(--space-3);
+        gap: var(--space-2);
+    }
+
+    .aptTime {
+        width: 40px;
+        font-size: var(--font-size-xs);
+    }
+
+    .aptName {
+        font-size: var(--font-size-sm);
+    }
+
+    .aptService {
+        font-size: var(--font-size-xs);
     }
 }

@@ -17,51 +17,61 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
 
     return (
         <header className={styles.header}>
-            <div className={styles.left}>
-                <h1 className={styles.title}>{title}</h1>
-                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-            </div>
-
-            <div className={styles.right}>
-                {actions}
-
-                {/* Language toggle */}
-                <div className={styles.langToggle}>
-                    <button
-                        className={`${styles.langBtn} ${locale === 'es' ? styles.langActive : ''}`}
-                        onClick={() => setLocale('es')}
-                    >
-                        ES
-                    </button>
-                    <button
-                        className={`${styles.langBtn} ${locale === 'en' ? styles.langActive : ''}`}
-                        onClick={() => setLocale('en')}
-                    >
-                        EN
-                    </button>
+            <div className={styles.topRow}>
+                <div className={styles.left}>
+                    <h1 className={styles.title}>{title}</h1>
+                    {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
                 </div>
 
-                {/* Theme toggle — compact icon */}
-                <button
-                    className={styles.iconBtn}
-                    onClick={toggleTheme}
-                    aria-label={theme === 'light' ? t('dark_mode') : t('light_mode')}
-                    title={theme === 'light' ? t('dark_mode') : t('light_mode')}
-                >
-                    <span>{theme === 'light' ? '🌙' : '☀️'}</span>
-                </button>
+                <div className={styles.right}>
+                    {/* Actions — inline on desktop */}
+                    {actions && (
+                        <div className={styles.desktopActions}>{actions}</div>
+                    )}
 
-                {/* Notifications bell */}
-                <button className={styles.iconBtn} aria-label={t('notifications')}>
-                    <span>🔔</span>
-                    <span className={styles.notifDot}></span>
-                </button>
+                    {/* Language toggle */}
+                    <div className={styles.langToggle}>
+                        <button
+                            className={`${styles.langBtn} ${locale === 'es' ? styles.langActive : ''}`}
+                            onClick={() => setLocale('es')}
+                        >
+                            ES
+                        </button>
+                        <button
+                            className={`${styles.langBtn} ${locale === 'en' ? styles.langActive : ''}`}
+                            onClick={() => setLocale('en')}
+                        >
+                            EN
+                        </button>
+                    </div>
 
-                {/* Profile avatar */}
-                <button className={styles.profileBtn}>
-                    <div className={styles.avatar}>D</div>
-                </button>
+                    {/* Theme toggle */}
+                    <button
+                        className={styles.iconBtn}
+                        onClick={toggleTheme}
+                        aria-label={theme === 'light' ? t('dark_mode') : t('light_mode')}
+                        title={theme === 'light' ? t('dark_mode') : t('light_mode')}
+                    >
+                        <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+                    </button>
+
+                    {/* Notifications */}
+                    <button className={styles.iconBtn} aria-label={t('notifications')}>
+                        <span>🔔</span>
+                        <span className={styles.notifDot}></span>
+                    </button>
+
+                    {/* Profile */}
+                    <button className={styles.profileBtn}>
+                        <div className={styles.avatar}>D</div>
+                    </button>
+                </div>
             </div>
+
+            {/* Actions — separate row on mobile */}
+            {actions && (
+                <div className={styles.mobileActions}>{actions}</div>
+            )}
         </header>
     );
 }
