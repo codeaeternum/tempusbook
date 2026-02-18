@@ -164,6 +164,9 @@ const translations = {
         required_field: 'Campo requerido',
         client_created: 'Cliente creado',
         client_updated: 'Cliente actualizado',
+        total_clients: 'Todos los clientes',
+        average: 'Promedio',
+        notes_placeholder: 'Notas sobre el cliente...',
 
         // Services page
         add_service: 'Nuevo servicio',
@@ -193,6 +196,17 @@ const translations = {
         min_abbr: 'min',
         search_services: 'Buscar servicios...',
         service_count: 'servicios',
+        bookings_count: 'reservas',
+        name_placeholder: 'Ej: Corte Clásico',
+        description_placeholder: 'Descripción del servicio...',
+
+        // Calendar event detail
+        staff_label: 'Staff',
+        confirmed: 'Confirmada',
+        pending: 'Pendiente',
+        in_progress: 'En curso',
+        completed: 'Completada',
+        cancelled: 'Cancelada',
     },
 
     en: {
@@ -354,6 +368,9 @@ const translations = {
         required_field: 'Required field',
         client_created: 'Client created',
         client_updated: 'Client updated',
+        total_clients: 'Total clients',
+        average: 'Average',
+        notes_placeholder: 'Notes about the client...',
 
         // Services page
         add_service: 'New service',
@@ -383,6 +400,17 @@ const translations = {
         min_abbr: 'min',
         search_services: 'Search services...',
         service_count: 'services',
+        bookings_count: 'bookings',
+        name_placeholder: 'E.g. Classic Cut',
+        description_placeholder: 'Service description...',
+
+        // Calendar event detail
+        staff_label: 'Staff',
+        confirmed: 'Confirmed',
+        pending: 'Pending',
+        in_progress: 'In Progress',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
     },
 } as const;
 

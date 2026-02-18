@@ -307,7 +307,7 @@ export default function ClientsPage() {
         <>
             <Header
                 title={t('clients')}
-                subtitle={`${stats.total} ${locale === 'es' ? 'todos los clientes' : 'total clients'}`}
+                subtitle={`${stats.total} ${t('total_clients')}`}
                 actions={
                     <button className="btn btn-primary" onClick={openCreateModal}>
                         + {t('add_client')}
@@ -322,7 +322,7 @@ export default function ClientsPage() {
                         <div className={`${styles.statIconBg} ${styles.purple}`}>👥</div>
                         <div className={styles.statInfo}>
                             <div className={styles.statValue}>{stats.total}</div>
-                            <div className={styles.statLabel}>{locale === 'es' ? 'Todos los clientes' : 'Total clients'}</div>
+                            <div className={styles.statLabel}>{t('total_clients')}</div>
                         </div>
                     </div>
                     <div className={`card ${styles.statCard}`}>
@@ -366,7 +366,7 @@ export default function ClientsPage() {
                                 className={`${styles.filterBtn} ${filter === f ? styles.filterBtnActive : ''}`}
                                 onClick={() => setFilter(f)}
                             >
-                                {f === 'all' ? (locale === 'es' ? 'Todos' : 'All') : t(f)}
+                                {f === 'all' ? t('all') : t(f)}
                             </button>
                         ))}
                     </div>
@@ -598,7 +598,7 @@ export default function ClientsPage() {
                                             ? formatCurrency(Math.round(selectedClient.totalSpent / selectedClient.totalVisits))
                                             : '$0'}
                                     </div>
-                                    <div className={styles.profileStatLabel}>{locale === 'es' ? 'Promedio' : 'Average'}</div>
+                                    <div className={styles.profileStatLabel}>{t('average')}</div>
                                 </div>
                             </div>
 
@@ -771,7 +771,7 @@ export default function ClientsPage() {
                                     value={form.notes}
                                     onChange={e => updateField('notes', e.target.value)}
                                     rows={3}
-                                    placeholder={locale === 'es' ? 'Notas sobre el cliente...' : 'Notes about the client...'}
+                                    placeholder={t('notes_placeholder')}
                                 />
                             </div>
                         </div>

@@ -480,22 +480,22 @@ export default function CalendarPage() {
                                     <span>{selectedEvent.service}</span>
                                 </div>
                                 <div className={styles.detailRow}>
-                                    <span className={styles.detailLabel}>🤝 Staff</span>
+                                    <span className={styles.detailLabel}>🤝 {t('team')}</span>
                                     <span>{selectedEvent.staff}</span>
                                 </div>
                                 <div className={styles.detailRow}>
-                                    <span className={styles.detailLabel}>📋 Status</span>
+                                    <span className={styles.detailLabel}>📋 {t('status')}</span>
                                     <span
                                         className={styles.statusDot}
                                         style={{ '--status-color': STATUS_COLORS[selectedEvent.status] } as React.CSSProperties}
                                     >
-                                        {selectedEvent.status}
+                                        {t(selectedEvent.status as any)}
                                     </span>
                                 </div>
                             </div>
                             <div className={styles.detailActions}>
-                                <button className="btn btn-sm" style={{ flex: 1 }}>Reagendar</button>
-                                <button className="btn btn-primary btn-sm" style={{ flex: 1 }}>Editar</button>
+                                <button className="btn btn-sm" style={{ flex: 1 }}>{t('reschedule')}</button>
+                                <button className="btn btn-primary btn-sm" style={{ flex: 1 }}>{t('edit')}</button>
                             </div>
                         </div>
                     </>

@@ -393,7 +393,7 @@ export default function ServicesPage() {
 
                                 {/* Bookings mini stat */}
                                 <div className={styles.bookingsBar}>
-                                    <span>{service.bookings} {locale === 'es' ? 'reservas' : 'bookings'}</span>
+                                    <span>{service.bookings} {t('bookings_count')}</span>
                                 </div>
                             </div>
                         </div>
@@ -426,7 +426,7 @@ export default function ServicesPage() {
                                     className={styles.formInput}
                                     value={form.name}
                                     onChange={e => updateField('name', e.target.value)}
-                                    placeholder={locale === 'es' ? 'Ej: Corte Clásico' : 'E.g. Classic Cut'}
+                                    placeholder={t('name_placeholder')}
                                 />
                             </div>
                             <div className={styles.formGroup}>
@@ -436,7 +436,7 @@ export default function ServicesPage() {
                                     value={form.description}
                                     onChange={e => updateField('description', e.target.value)}
                                     rows={2}
-                                    placeholder={locale === 'es' ? 'Descripción del servicio...' : 'Service description...'}
+                                    placeholder={t('description_placeholder')}
                                 />
                             </div>
                             <div className={styles.formRow}>
@@ -488,9 +488,7 @@ export default function ServicesPage() {
                                             <span className={styles.toggleSlider} />
                                         </label>
                                         <span className={styles.toggleLabel}>
-                                            {form.isActive
-                                                ? (locale === 'es' ? 'Activo' : 'Active')
-                                                : (locale === 'es' ? 'Inactivo' : 'Inactive')}
+                                            {form.isActive ? t('active') : t('inactive')}
                                         </span>
                                     </div>
                                 </div>
@@ -520,7 +518,7 @@ export default function ServicesPage() {
                         </div>
                         <div className={styles.modalFooter}>
                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
-                                {locale === 'es' ? 'Cancelar' : 'Cancel'}
+                                {t('cancel')}
                             </button>
                             <button className="btn btn-primary" onClick={handleSave}>
                                 {t('save_service')}
