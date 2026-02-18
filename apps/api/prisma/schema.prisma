@@ -1,0 +1,587 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// Users & Authentication
+// =============================================
+
+model User {
+  id            String   @id @default(uuid())
+  firebaseUid   String   @unique @map("firebase_uid")
+  email         String?  @unique
+  phone         String?
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  avatarUrl     String?  @map("avatar_url")
+  preferredLang String   @default("es") @map("preferred_lang")
+  role          UserRole @default(CLIENT)
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  businessMembers BusinessMember[]
+  bookings        Booking[]        @relation("ClientBookings")
+  reviews         Review[]
+  loyaltyCards    LoyaltyCard[]
+  favorites       Favorite[]
+  notifications   Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  CLIENT
+  BUSINESS_USER
+}
+
+// =============================================
+// Business & Categories
+// =============================================
+
+model Business {
+  id             String         @id @default(uuid())
+  name           String
+  slug           String         @unique
+  categoryId     String         @map("category_id")
+  description    String?
+  logoUrl        String?        @map("logo_url")
+  coverUrl       String?        @map("cover_url")
+  phone          String?
+  email          String?
+  website        String?
+  latitude       Float?
+  longitude      Float?
+  address        String?
+  city           String?
+  state          String?
+  country        String         @default("MX")
+  timezone       String         @default("America/Mexico_City")
+  currency       String         @default("MXN")
+  ratingsEnabled Boolean        @default(true) @map("ratings_enabled")
+  settings       Json           @default("{}")
+  calendarMode   CalendarMode   @default(SHARED) @map("calendar_mode")
+  status         BusinessStatus @default(ONBOARDING)
+  avgRating      Float          @default(0) @map("avg_rating")
+  totalReviews   Int            @default(0) @map("total_reviews")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  category      Category         @relation(fields: [categoryId], references: [id])
+  members       BusinessMember[]
+  services      Service[]
+  products      Product[]
+  bookings      Booking[]
+  reviews       Review[]
+  businessHours BusinessHours[]
+  branches      Branch[]
+  subscription  Subscription?
+  loyaltyPrograms LoyaltyProgram[]
+  payments      Payment[]
+  favorites     Favorite[]
+  galleryItems  GalleryItem[]
+  notifications Notification[]
+  waitlistEntries WaitlistEntry[]
+  intakeFormOverrides IntakeFormOverride[]
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([latitude, longitude])
+  @@index([city, country])
+  @@map("businesses")
+}
+
+enum BusinessStatus {
+  ONBOARDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum CalendarMode {
+  INDIVIDUAL
+  SHARED
+}
+
+model Category {
+  id              String   @id @default(uuid())
+  name            String
+  slug            String   @unique
+  icon            String
+  description     String?
+  defaultSettings Json     @default("{}") @map("default_settings")
+  enabledModules  String[] @map("enabled_modules")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  businesses Business[]
+
+  @@map("categories")
+}
+
+model Branch {
+  id         String  @id @default(uuid())
+  businessId String  @map("business_id")
+  name       String
+  address    String?
+  city       String?
+  state      String?
+  latitude   Float?
+  longitude  Float?
+  phone      String?
+  isActive   Boolean @default(true) @map("is_active")
+
+  // Relations
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([businessId])
+  @@map("branches")
+}
+
+// =============================================
+// Team / Staff
+// =============================================
+
+model BusinessMember {
+  id         String       @id @default(uuid())
+  businessId String       @map("business_id")
+  userId     String       @map("user_id")
+  role       BusinessRole @default(EMPLOYEE)
+  isActive   Boolean      @default(true) @map("is_active")
+  color      String?      // Calendar color
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings      Booking[]       @relation("StaffBookings")
+  businessHours BusinessHours[]
+
+  @@unique([businessId, userId])
+  @@index([businessId])
+  @@index([userId])
+  @@map("business_members")
+}
+
+enum BusinessRole {
+  OWNER
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+// =============================================
+// Services & Products
+// =============================================
+
+model Service {
+  id              String  @id @default(uuid())
+  businessId      String  @map("business_id")
+  name            String
+  description     String?
+  durationMinutes Int     @map("duration_minutes")
+  price           Decimal @db.Decimal(10, 2)
+  currency        String  @default("MXN")
+  requiresDeposit Boolean @default(false) @map("requires_deposit")
+  depositAmount   Decimal? @db.Decimal(10, 2) @map("deposit_amount")
+  isGroup         Boolean @default(false) @map("is_group")
+  maxCapacity     Int?    @map("max_capacity")
+  isActive        Boolean @default(true) @map("is_active")
+  sortOrder       Int     @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([businessId])
+  @@map("services")
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  businessId  String  @map("business_id")
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  currency    String  @default("MXN")
+  stock       Int     @default(0)
+  imageUrl    String? @map("image_url")
+  isActive    Boolean @default(true) @map("is_active")
+  sortOrder   Int     @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@map("products")
+}
+
+// =============================================
+// Bookings & Calendar
+// =============================================
+
+model Booking {
+  id                String        @id @default(uuid())
+  businessId        String        @map("business_id")
+  clientId          String        @map("client_id")
+  serviceId         String        @map("service_id")
+  staffId           String?       @map("staff_id")
+  branchId          String?       @map("branch_id")
+  startTime         DateTime      @map("start_time")
+  endTime           DateTime      @map("end_time")
+  status            BookingStatus @default(PENDING)
+  clientNotes       String?       @map("client_notes")
+  staffNotes        String?       @map("staff_notes")
+  categoryData      Json          @default("{}") @map("category_data")
+  intakeFormData    Json?         @map("intake_form_data")
+  reminderSent      Boolean       @default(false) @map("reminder_sent")
+  confirmedByClient Boolean       @default(false) @map("confirmed_by_client")
+  rescheduleCount   Int           @default(0) @map("reschedule_count")
+  cancelledAt       DateTime?     @map("cancelled_at")
+  cancelReason      String?       @map("cancel_reason")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  business Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client   User            @relation("ClientBookings", fields: [clientId], references: [id])
+  service  Service         @relation(fields: [serviceId], references: [id])
+  staff    BusinessMember? @relation("StaffBookings", fields: [staffId], references: [id])
+  branch   Branch?         @relation(fields: [branchId], references: [id])
+  payments Payment[]
+  review   Review?
+
+  @@index([businessId, startTime])
+  @@index([clientId])
+  @@index([staffId])
+  @@index([status])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model BusinessHours {
+  id         String    @id @default(uuid())
+  businessId String    @map("business_id")
+  staffId    String?   @map("staff_id")
+  dayOfWeek  DayOfWeek @map("day_of_week")
+  openTime   String    @map("open_time") // HH:mm
+  closeTime  String    @map("close_time") // HH:mm
+  isActive   Boolean   @default(true) @map("is_active")
+
+  // Relations
+  business Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  staff    BusinessMember? @relation(fields: [staffId], references: [id])
+
+  @@index([businessId])
+  @@map("business_hours")
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model WaitlistEntry {
+  id         String   @id @default(uuid())
+  businessId String   @map("business_id")
+  clientId   String   @map("client_id")
+  serviceId  String   @map("service_id")
+  preferredDate DateTime? @map("preferred_date")
+  status     WaitlistStatus @default(WAITING)
+  notifiedAt DateTime? @map("notified_at")
+  expiresAt  DateTime? @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, status])
+  @@map("waitlist_entries")
+}
+
+enum WaitlistStatus {
+  WAITING
+  OFFERED
+  ACCEPTED
+  EXPIRED
+}
+
+// =============================================
+// Payments & Subscriptions
+// =============================================
+
+model Payment {
+  id              String        @id @default(uuid())
+  bookingId       String?       @map("booking_id")
+  businessId      String        @map("business_id")
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("MXN")
+  type            PaymentType   @default(FULL)
+  status          PaymentStatus @default(PENDING)
+  mpPaymentId     String?       @map("mp_payment_id")
+  mpPreferenceId  String?       @map("mp_preference_id")
+  mpResponse      Json?         @map("mp_response")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  booking  Booking?  @relation(fields: [bookingId], references: [id])
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([bookingId])
+  @@map("payments")
+}
+
+enum PaymentType {
+  DEPOSIT
+  FULL
+  TIP
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  businessId         String             @unique @map("business_id")
+  plan               SubscriptionPlan   @default(FREE)
+  status             SubscriptionStatus @default(TRIAL)
+  trialEndsAt        DateTime?          @map("trial_ends_at")
+  currentPeriodStart DateTime           @map("current_period_start")
+  currentPeriodEnd   DateTime           @map("current_period_end")
+  mpSubscriptionId   String?            @map("mp_subscription_id")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  PAST_DUE
+  CANCELLED
+}
+
+// =============================================
+// Reviews & Ratings
+// =============================================
+
+model Review {
+  id         String   @id @default(uuid())
+  businessId String   @map("business_id")
+  clientId   String   @map("client_id")
+  bookingId  String?  @unique @map("booking_id")
+  rating     Int      // 1-5
+  comment    String?
+  reply      String?  // Business reply
+  repliedAt  DateTime? @map("replied_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client   User     @relation(fields: [clientId], references: [id])
+  booking  Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([businessId])
+  @@map("reviews")
+}
+
+// =============================================
+// Loyalty Programs
+// =============================================
+
+model LoyaltyProgram {
+  id         String      @id @default(uuid())
+  businessId String      @map("business_id")
+  name       String
+  type       LoyaltyType
+  config     Json        // Points-per-visit, stamps-needed, level-thresholds, etc.
+  isActive   Boolean     @default(true) @map("is_active")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  business Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  cards    LoyaltyCard[]
+
+  @@index([businessId])
+  @@map("loyalty_programs")
+}
+
+enum LoyaltyType {
+  STAMPS    // Digital stamp card
+  POINTS    // Points per visit/purchase
+  TIERS     // Bronze/Silver/Gold
+}
+
+model LoyaltyCard {
+  id               String   @id @default(uuid())
+  loyaltyProgramId String   @map("loyalty_program_id")
+  clientId         String   @map("client_id")
+  currentValue     Int      @default(0) @map("current_value") // stamps, points, or tier level
+  totalEarned      Int      @default(0) @map("total_earned")
+  totalRedeemed    Int      @default(0) @map("total_redeemed")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  program LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  client  User           @relation(fields: [clientId], references: [id])
+
+  @@unique([loyaltyProgramId, clientId])
+  @@map("loyalty_cards")
+}
+
+// =============================================
+// Favorites
+// =============================================
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  businessId String   @map("business_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+  @@map("favorites")
+}
+
+// =============================================
+// Gallery (Before/After + Digital Archive)
+// =============================================
+
+model GalleryItem {
+  id         String      @id @default(uuid())
+  businessId String      @map("business_id")
+  type       GalleryType
+  title      String?
+  beforeUrl  String?     @map("before_url")
+  afterUrl   String?     @map("after_url")
+  fileUrl    String?     @map("file_url") // For digital archive
+  mimeType   String?     @map("mime_type")
+  isPublic   Boolean     @default(true) @map("is_public")
+  sortOrder  Int         @default(0) @map("sort_order")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@map("gallery_items")
+}
+
+enum GalleryType {
+  BEFORE_AFTER
+  PORTFOLIO
+  DOCUMENT
+}
+
+// =============================================
+// Notifications
+// =============================================
+
+model Notification {
+  id         String             @id @default(uuid())
+  userId     String             @map("user_id")
+  businessId String?            @map("business_id")
+  type       NotificationType
+  channel    NotificationChannel
+  title      String
+  body       String
+  data       Json               @default("{}")
+  isRead     Boolean            @default(false) @map("is_read")
+  sentAt     DateTime?          @map("sent_at")
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business? @relation(fields: [businessId], references: [id])
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_REMINDER
+  BOOKING_CANCELLED
+  BOOKING_RESCHEDULED
+  SLOT_AVAILABLE
+  PAYMENT_RECEIVED
+  REVIEW_REQUEST
+  LOYALTY_REWARD
+  PROMOTION
+}
+
+enum NotificationChannel {
+  PUSH
+  EMAIL
+  WHATSAPP
+  IN_APP
+}
+
+// =============================================
+// Intake Form Overrides (per business)
+// =============================================
+
+model IntakeFormOverride {
+  id         String   @id @default(uuid())
+  businessId String   @map("business_id")
+  formSchema Json     @map("form_schema") // Custom JSON schema
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId])
+  @@map("intake_form_overrides")
+}
