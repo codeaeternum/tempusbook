@@ -215,11 +215,34 @@ function getEmailUrl(email: string): string {
 // ---- Component ----
 type FilterStatus = 'all' | 'active' | 'inactive' | 'vip';
 
+interface ClientForm {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    status: 'active' | 'inactive' | 'vip';
+    notes: string;
+}
+
+const EMPTY_FORM: ClientForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    status: 'active',
+    notes: '',
+};
+
 export default function ClientsPage() {
     const { t, locale } = useLocale();
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<FilterStatus>('all');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+    // Modal state
+    const [showModal, setShowModal] = useState(false);
+    const [editingClient, setEditingClient] = useState<Client | null>(null);
+    const [form, setForm] = useState<ClientForm>(EMPTY_FORM);
 
     const filtered = useMemo(() => {
         let list = MOCK_CLIENTS;
@@ -229,7 +252,7 @@ export default function ClientsPage() {
             list = list.filter(c => c.status === filter);
         }
 
-        // Search filter
+        // Search
         if (search.trim()) {
             const q = search.toLowerCase();
             list = list.filter(c =>
@@ -242,21 +265,51 @@ export default function ClientsPage() {
         return list;
     }, [search, filter]);
 
-    // Summary stats
-    const stats = useMemo(() => ({
-        total: MOCK_CLIENTS.length,
-        active: MOCK_CLIENTS.filter(c => c.status === 'active').length,
-        vip: MOCK_CLIENTS.filter(c => c.status === 'vip').length,
-        totalRevenue: MOCK_CLIENTS.reduce((sum, c) => sum + c.totalSpent, 0),
-    }), []);
+    const stats = useMemo(() => {
+        const total = MOCK_CLIENTS.length;
+        const active = MOCK_CLIENTS.filter(c => c.status === 'active' || c.status === 'vip').length;
+        const vip = MOCK_CLIENTS.filter(c => c.status === 'vip').length;
+        const revenue = MOCK_CLIENTS.reduce((s, c) => s + c.totalSpent, 0);
+        return { total, active, vip, revenue };
+    }, []);
+
+    const openCreateModal = () => {
+        setEditingClient(null);
+        setForm(EMPTY_FORM);
+        setShowModal(true);
+    };
+
+    const openEditModal = (client: Client) => {
+        setEditingClient(client);
+        setForm({
+            firstName: client.firstName,
+            lastName: client.lastName,
+            email: client.email,
+            phone: client.phone,
+            status: client.status,
+            notes: client.notes,
+        });
+        setShowModal(true);
+    };
+
+    const handleSave = () => {
+        // In production, this would call an API
+        setShowModal(false);
+        setEditingClient(null);
+        setForm(EMPTY_FORM);
+    };
+
+    const updateField = (field: keyof ClientForm, value: string) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+    };
 
     return (
         <>
             <Header
                 title={t('clients')}
-                subtitle={`${stats.total} ${t('all_clients').toLowerCase()}`}
+                subtitle={`${stats.total} ${locale === 'es' ? 'todos los clientes' : 'total clients'}`}
                 actions={
-                    <button className="btn btn-primary btn-sm">
+                    <button className="btn btn-primary" onClick={openCreateModal}>
                         + {t('add_client')}
                     </button>
                 }
@@ -268,40 +321,39 @@ export default function ClientsPage() {
                     <div className={`card ${styles.statCard}`}>
                         <div className={`${styles.statIconBg} ${styles.purple}`}>👥</div>
                         <div className={styles.statInfo}>
-                            <span className={styles.statValue}>{stats.total}</span>
-                            <span className={styles.statLabel}>{t('all_clients')}</span>
+                            <div className={styles.statValue}>{stats.total}</div>
+                            <div className={styles.statLabel}>{locale === 'es' ? 'Todos los clientes' : 'Total clients'}</div>
                         </div>
                     </div>
                     <div className={`card ${styles.statCard}`}>
                         <div className={`${styles.statIconBg} ${styles.green}`}>✓</div>
                         <div className={styles.statInfo}>
-                            <span className={styles.statValue}>{stats.active}</span>
-                            <span className={styles.statLabel}>{t('active')}</span>
+                            <div className={styles.statValue}>{stats.active}</div>
+                            <div className={styles.statLabel}>{t('active')}</div>
                         </div>
                     </div>
                     <div className={`card ${styles.statCard}`}>
                         <div className={`${styles.statIconBg} ${styles.amber}`}>⭐</div>
                         <div className={styles.statInfo}>
-                            <span className={styles.statValue}>{stats.vip}</span>
-                            <span className={styles.statLabel}>{t('vip')}</span>
+                            <div className={styles.statValue}>{stats.vip}</div>
+                            <div className={styles.statLabel}>VIP</div>
                         </div>
                     </div>
                     <div className={`card ${styles.statCard}`}>
                         <div className={`${styles.statIconBg} ${styles.blue}`}>💰</div>
                         <div className={styles.statInfo}>
-                            <span className={styles.statValue}>{formatCurrency(stats.totalRevenue)}</span>
-                            <span className={styles.statLabel}>{t('total_spent')}</span>
+                            <div className={styles.statValue}>{formatCurrency(stats.revenue)}</div>
+                            <div className={styles.statLabel}>{t('total_revenue')}</div>
                         </div>
                     </div>
                 </div>
 
-                {/* Toolbar: Search + Filters */}
+                {/* Toolbar */}
                 <div className={styles.toolbar}>
                     <div className={styles.searchBox}>
                         <span className={styles.searchIcon}>🔍</span>
                         <input
                             className={styles.searchInput}
-                            type="text"
                             placeholder={t('search_clients')}
                             value={search}
                             onChange={e => setSearch(e.target.value)}
@@ -314,14 +366,14 @@ export default function ClientsPage() {
                                 className={`${styles.filterBtn} ${filter === f ? styles.filterBtnActive : ''}`}
                                 onClick={() => setFilter(f)}
                             >
-                                {t(f === 'all' ? 'all' : f as any)}
+                                {f === 'all' ? (locale === 'es' ? 'Todos' : 'All') : t(f)}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className={`card ${styles.tableCard}`}>
+                {/* Desktop Table */}
+                <div className={`card ${styles.tableCard} ${styles.desktopOnly}`}>
                     <div className={styles.tableWrapper}>
                         <table className={styles.table}>
                             <thead>
@@ -338,7 +390,7 @@ export default function ClientsPage() {
                             <tbody>
                                 {filtered.map(client => (
                                     <tr key={client.id} onClick={() => setSelectedClient(client)}>
-                                        <td data-label={t('client_name')}>
+                                        <td>
                                             <div className={styles.clientCell}>
                                                 <div className={styles.avatar}>
                                                     {getInitials(client.firstName, client.lastName)}
@@ -351,7 +403,7 @@ export default function ClientsPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td data-label={t('status')}>
+                                        <td>
                                             <span className={`${styles.statusBadge} ${client.status === 'active' ? styles.statusActive :
                                                 client.status === 'vip' ? styles.statusVip :
                                                     styles.statusInactive
@@ -360,7 +412,7 @@ export default function ClientsPage() {
                                                 {t(client.status as any)}
                                             </span>
                                         </td>
-                                        <td data-label={t('contact')}>
+                                        <td>
                                             <div className={styles.contactCell}>
                                                 <span>{client.phone}</span>
                                                 <div className={styles.contactActions}>
@@ -393,13 +445,13 @@ export default function ClientsPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td data-label={t('total_visits')}>
+                                        <td>
                                             <span className={styles.visitCount}>{client.totalVisits}</span>
                                         </td>
-                                        <td data-label={t('total_spent')}>
+                                        <td>
                                             <span className={styles.spentAmount}>{formatCurrency(client.totalSpent)}</span>
                                         </td>
-                                        <td data-label={t('last_visit')}>
+                                        <td>
                                             {formatDate(client.lastVisit, locale)}
                                         </td>
                                         <td>
@@ -417,6 +469,84 @@ export default function ClientsPage() {
                     </div>
                     <div className={styles.tableFooter}>
                         <span>{t('showing_results')}: {filtered.length} {t('of')} {MOCK_CLIENTS.length}</span>
+                    </div>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className={styles.mobileOnly}>
+                    {filtered.map(client => (
+                        <div
+                            key={client.id}
+                            className={`card ${styles.mobileCard}`}
+                            onClick={() => setSelectedClient(client)}
+                        >
+                            <div className={styles.mobileCardHeader}>
+                                <div className={styles.avatar}>
+                                    {getInitials(client.firstName, client.lastName)}
+                                </div>
+                                <div className={styles.mobileCardInfo}>
+                                    <div className={styles.clientName}>
+                                        {client.firstName} {client.lastName}
+                                    </div>
+                                    <div className={styles.clientEmail}>{client.email}</div>
+                                </div>
+                                <span className={`${styles.statusBadge} ${client.status === 'active' ? styles.statusActive :
+                                    client.status === 'vip' ? styles.statusVip :
+                                        styles.statusInactive
+                                    }`}>
+                                    <span className={styles.statusDot} />
+                                    {t(client.status as any)}
+                                </span>
+                            </div>
+                            <div className={styles.mobileCardStats}>
+                                <div className={styles.mobileStatItem}>
+                                    <span className={styles.mobileStatLabel}>{t('total_visits')}</span>
+                                    <span className={styles.mobileStatValue}>{client.totalVisits}</span>
+                                </div>
+                                <div className={styles.mobileStatItem}>
+                                    <span className={styles.mobileStatLabel}>{t('total_spent')}</span>
+                                    <span className={`${styles.mobileStatValue} ${styles.spentAmount}`}>{formatCurrency(client.totalSpent)}</span>
+                                </div>
+                                <div className={styles.mobileStatItem}>
+                                    <span className={styles.mobileStatLabel}>{t('last_visit')}</span>
+                                    <span className={styles.mobileStatValue}>{formatDate(client.lastVisit, locale)}</span>
+                                </div>
+                            </div>
+                            <div className={styles.mobileCardActions}>
+                                <a
+                                    href={getWhatsAppUrl(client.phone, client.firstName)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`${styles.mobileActionBtn} ${styles.whatsappBtn}`}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                                </a>
+                                <a
+                                    href={getCallUrl(client.phone)}
+                                    className={`${styles.mobileActionBtn} ${styles.callBtn}`}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
+                                </a>
+                                <a
+                                    href={getEmailUrl(client.email)}
+                                    className={`${styles.mobileActionBtn} ${styles.emailBtn}`}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                                </a>
+                                <button
+                                    className={styles.mobileEditBtn}
+                                    onClick={(e) => { e.stopPropagation(); openEditModal(client); }}
+                                >
+                                    ✏️
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    <div className={styles.mobileFooter}>
+                        {t('showing_results')}: {filtered.length} {t('of')} {MOCK_CLIENTS.length}
                     </div>
                 </div>
             </div>
@@ -468,7 +598,7 @@ export default function ClientsPage() {
                                             ? formatCurrency(Math.round(selectedClient.totalSpent / selectedClient.totalVisits))
                                             : '$0'}
                                     </div>
-                                    <div className={styles.profileStatLabel}>Promedio</div>
+                                    <div className={styles.profileStatLabel}>{locale === 'es' ? 'Promedio' : 'Average'}</div>
                                 </div>
                             </div>
 
@@ -551,8 +681,107 @@ export default function ClientsPage() {
 
                         {/* Panel Actions */}
                         <div className={styles.panelActions}>
-                            <button className="btn btn-secondary">{t('reschedule')}</button>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => { setSelectedClient(null); openEditModal(selectedClient); }}
+                            >
+                                ✏️ {t('edit_client')}
+                            </button>
                             <button className="btn btn-primary">{t('schedule_appointment')}</button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Create / Edit Modal */}
+            {showModal && (
+                <>
+                    <div className={styles.modalOverlay} onClick={() => setShowModal(false)} />
+                    <div className={styles.modal}>
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>
+                                {editingClient ? t('edit_client') : t('add_client')}
+                            </h2>
+                            <button className={styles.panelCloseBtn} onClick={() => setShowModal(false)}>✕</button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('first_name')}</label>
+                                    <input
+                                        className={styles.formInput}
+                                        value={form.firstName}
+                                        onChange={e => updateField('firstName', e.target.value)}
+                                        placeholder="María"
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('last_name')}</label>
+                                    <input
+                                        className={styles.formInput}
+                                        value={form.lastName}
+                                        onChange={e => updateField('lastName', e.target.value)}
+                                        placeholder="García"
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('email_address')}</label>
+                                    <input
+                                        className={styles.formInput}
+                                        type="email"
+                                        value={form.email}
+                                        onChange={e => updateField('email', e.target.value)}
+                                        placeholder="maria@email.com"
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('phone_number')}</label>
+                                    <input
+                                        className={styles.formInput}
+                                        type="tel"
+                                        value={form.phone}
+                                        onChange={e => updateField('phone', e.target.value)}
+                                        placeholder="+52 55 1234 5678"
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>{t('status')}</label>
+                                <div className={styles.statusSelect}>
+                                    {(['active', 'vip', 'inactive'] as const).map(s => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            className={`${styles.statusOption} ${form.status === s ? styles.statusOptionActive : ''} ${s === 'active' ? styles.statusOptGreen :
+                                                s === 'vip' ? styles.statusOptAmber : styles.statusOptGray
+                                                }`}
+                                            onClick={() => updateField('status', s)}
+                                        >
+                                            {t(s)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>{t('notes')}</label>
+                                <textarea
+                                    className={styles.formTextarea}
+                                    value={form.notes}
+                                    onChange={e => updateField('notes', e.target.value)}
+                                    rows={3}
+                                    placeholder={locale === 'es' ? 'Notas sobre el cliente...' : 'Notes about the client...'}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                {t('cancel')}
+                            </button>
+                            <button className="btn btn-primary" onClick={handleSave}>
+                                {editingClient ? t('save_changes') : t('add_client')}
+                            </button>
                         </div>
                     </div>
                 </>

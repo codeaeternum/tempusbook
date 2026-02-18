@@ -155,7 +155,16 @@
     letter-spacing: 0.05em;
 }
 
-/* -------- Table -------- */
+/* -------- Desktop / Mobile Visibility -------- */
+.mobileOnly {
+    display: none;
+}
+
+.desktopOnly {
+    display: block;
+}
+
+/* -------- Table (Desktop) -------- */
 .tableCard {
     overflow: hidden;
     padding: 0;
@@ -283,6 +292,7 @@
     color: hsl(40 70% 65%);
 }
 
+/* Contact cell with action buttons */
 .contactCell {
     display: flex;
     align-items: center;
@@ -344,6 +354,149 @@
     background: var(--color-primary);
     color: white;
     box-shadow: 0 2px 8px var(--color-primary-bg);
+}
+
+.contactPhone {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+.visitCount {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.spentAmount {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-success);
+}
+
+.actionBtn {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.actionBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+
+/* -------- Mobile Cards -------- */
+.mobileCard {
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.mobileCard:active {
+    transform: scale(0.98);
+}
+
+.mobileCardHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mobileCardInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.mobileCardInfo .clientName {
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobileCardInfo .clientEmail {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobileCardStats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.mobileStatItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mobileStatLabel {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.mobileStatValue {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.mobileCardActions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.mobileActionBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border: none;
+}
+
+.mobileEditBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-hover);
+    border: 1px solid var(--color-border-light);
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: auto;
+    transition: all var(--transition-fast);
+}
+
+.mobileEditBtn:hover {
+    background: var(--color-primary-bg);
+    border-color: var(--color-primary);
+}
+
+.mobileFooter {
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    padding: var(--space-4) 0;
 }
 
 /* Profile panel contact links */
@@ -416,38 +569,6 @@
     color: white;
     box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
     transform: translateY(-1px);
-}
-
-.contactPhone {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-}
-
-.visitCount {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-}
-
-.spentAmount {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-success);
-}
-
-.actionBtn {
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.actionBtn:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-bg);
 }
 
 /* -------- Profile Panel (slide-over) -------- */
@@ -727,6 +848,197 @@
     border-top: 1px solid var(--color-border-light);
 }
 
+/* -------- Create / Edit Modal -------- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    max-width: 92vw;
+    max-height: 90vh;
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    animation: modalIn 0.25s ease-out;
+    overflow: hidden;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--color-border-light);
+    flex-shrink: 0;
+}
+
+.modalTitle {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin: 0;
+}
+
+.modalBody {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    overflow-y: auto;
+}
+
+.modalFooter {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    padding: var(--space-5) var(--space-6);
+    border-top: 1px solid var(--color-border-light);
+    flex-shrink: 0;
+}
+
+/* Form elements */
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.formLabel {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.formInput {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-base);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.formInput:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.formInput::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.formTextarea {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-base);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    min-height: 80px;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.formTextarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.formTextarea::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+/* Status selector in modal */
+.statusSelect {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.statusOption {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.statusOption:hover {
+    border-color: var(--color-text-tertiary);
+}
+
+.statusOptionActive.statusOptGreen {
+    background: hsl(152 50% 92%);
+    color: hsl(152 60% 30%);
+    border-color: hsl(152 50% 60%);
+}
+
+.statusOptionActive.statusOptAmber {
+    background: hsl(40 80% 92%);
+    color: hsl(30 70% 35%);
+    border-color: hsl(40 70% 55%);
+}
+
+.statusOptionActive.statusOptGray {
+    background: var(--color-bg-hover);
+    color: var(--color-text-secondary);
+    border-color: var(--color-text-tertiary);
+}
+
+[data-theme="dark"] .statusOptionActive.statusOptGreen {
+    background: hsl(152 40% 18%);
+    color: hsl(152 60% 70%);
+    border-color: hsl(152 40% 40%);
+}
+
+[data-theme="dark"] .statusOptionActive.statusOptAmber {
+    background: hsl(40 40% 18%);
+    color: hsl(40 70% 65%);
+    border-color: hsl(40 40% 40%);
+}
+
 /* -------- Responsive -------- */
 @media (max-width: 1024px) {
     .statsRow {
@@ -758,36 +1070,13 @@
         gap: var(--space-3);
     }
 
-    /* Card view on mobile instead of table */
-    .table thead {
+    /* Hide desktop table, show mobile cards */
+    .desktopOnly {
         display: none;
     }
 
-    .table,
-    .table tbody,
-    .table tr,
-    .table td {
+    .mobileOnly {
         display: block;
-    }
-
-    .table tr {
-        padding: var(--space-4);
-        border-bottom: 1px solid var(--color-border-light);
-    }
-
-    .table td {
-        padding: 4px 0;
-        border: none;
-    }
-
-    .table td::before {
-        content: attr(data-label);
-        font-size: var(--font-size-xs);
-        color: var(--color-text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        display: block;
-        margin-bottom: 2px;
     }
 
     .profilePanel {
@@ -798,5 +1087,15 @@
     .profileStats {
         grid-template-columns: repeat(3, 1fr);
         gap: var(--space-2);
+    }
+
+    /* Modal responsive */
+    .modal {
+        width: 95vw;
+        max-height: 85vh;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
     }
 }
