@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useLocale } from '@/providers/LocaleProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle, actions }: HeaderProps) {
     const { t, locale, setLocale } = useLocale();
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <header className={styles.header}>
@@ -38,6 +40,16 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
                         EN
                     </button>
                 </div>
+
+                {/* Theme toggle — compact icon */}
+                <button
+                    className={styles.iconBtn}
+                    onClick={toggleTheme}
+                    aria-label={theme === 'light' ? t('dark_mode') : t('light_mode')}
+                    title={theme === 'light' ? t('dark_mode') : t('light_mode')}
+                >
+                    <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+                </button>
 
                 {/* Notifications bell */}
                 <button className={styles.iconBtn} aria-label={t('notifications')}>

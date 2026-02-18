@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTheme } from '@/providers/ThemeProvider';
 import { useLocale } from '@/providers/LocaleProvider';
 import styles from './Sidebar.module.css';
 
@@ -29,15 +28,9 @@ const navItems: NavItem[] = [
     { key: 'reports', icon: '📈', path: '/dashboard/reports', badge: 'Pro' },
 ];
 
-const bottomItems: NavItem[] = [
-    { key: 'settings', icon: '⚙️', path: '/dashboard/settings' },
-    { key: 'subscription', icon: '💎', path: '/dashboard/subscription' },
-];
-
 export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const pathname = usePathname();
-    const { theme, toggleTheme } = useTheme();
     const { t } = useLocale();
 
     const isActive = (path: string) => {
@@ -47,10 +40,18 @@ export default function Sidebar() {
 
     return (
         <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
-            {/* Logo */}
-            <div className={styles.logo}>
-                <div className={styles.logoIcon}>T</div>
-                {!collapsed && <span className={styles.logoText}>TempusBook</span>}
+            {/* Logo + Plan badge */}
+            <div className={styles.logoArea}>
+                <div className={styles.logo}>
+                    <div className={styles.logoIcon}>T</div>
+                    {!collapsed && <span className={styles.logoText}>TempusBook</span>}
+                </div>
+                {!collapsed && (
+                    <Link href="/dashboard/subscription" className={styles.planChip}>
+                        <span className={styles.planDot}></span>
+                        Pro Trial · 12d
+                    </Link>
+                )}
             </div>
 
             {/* Toggle */}
@@ -87,34 +88,16 @@ export default function Sidebar() {
                 </ul>
             </nav>
 
-            {/* Bottom section */}
+            {/* Bottom — only settings */}
             <div className={styles.bottom}>
-                {/* Theme toggle */}
-                <button
-                    className={styles.navItem}
-                    onClick={toggleTheme}
-                    title={theme === 'light' ? t('dark_mode') : t('light_mode')}
+                <Link
+                    href="/dashboard/settings"
+                    className={`${styles.navItem} ${isActive('/dashboard/settings') ? styles.active : ''}`}
+                    title={collapsed ? t('settings') : undefined}
                 >
-                    <span className={styles.navIcon}>{theme === 'light' ? '🌙' : '☀️'}</span>
-                    {!collapsed && (
-                        <span className={styles.navLabel}>
-                            {theme === 'light' ? t('dark_mode') : t('light_mode')}
-                        </span>
-                    )}
-                </button>
-
-                {/* Bottom nav items */}
-                {bottomItems.map((item) => (
-                    <Link
-                        key={item.key}
-                        href={item.path}
-                        className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
-                        title={collapsed ? t(item.key as any) : undefined}
-                    >
-                        <span className={styles.navIcon}>{item.icon}</span>
-                        {!collapsed && <span className={styles.navLabel}>{t(item.key as any)}</span>}
-                    </Link>
-                ))}
+                    <span className={styles.navIcon}>⚙️</span>
+                    {!collapsed && <span className={styles.navLabel}>{t('settings')}</span>}
+                </Link>
             </div>
         </aside>
     );
