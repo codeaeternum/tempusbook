@@ -700,8 +700,37 @@
     }
 
     .statsRow {
-        grid-template-columns: repeat(2, 1fr);
+        display: flex;
         gap: var(--space-3);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        padding-bottom: var(--space-2);
+        margin-left: calc(-1 * var(--space-4));
+        margin-right: calc(-1 * var(--space-4));
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+    }
+
+    .statsRow::-webkit-scrollbar {
+        display: none;
+    }
+
+    .statsRow>* {
+        min-width: 160px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+    }
+
+    .statCard {
+        padding: var(--space-4);
+        gap: var(--space-3);
+    }
+
+    .statIconBg {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
     }
 
     .serviceGrid {
@@ -719,6 +748,10 @@
 
     .categoryTabs {
         gap: var(--space-2);
+        margin-left: calc(-1 * var(--space-4));
+        margin-right: calc(-1 * var(--space-4));
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
     }
 
     .modal {
@@ -728,27 +761,5 @@
 
     .formRow {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .statsRow {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-2);
-    }
-
-    .statCard {
-        padding: var(--space-3);
-        gap: var(--space-2);
-    }
-
-    .statIconBg {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-
-    .statValue {
-        font-size: var(--font-size-lg);
     }
 }

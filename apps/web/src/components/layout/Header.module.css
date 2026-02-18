@@ -54,24 +54,34 @@
     display: none;
 }
 
-/* Language toggle */
+/* ===== Language Toggle — Segmented Control ===== */
 .langToggle {
     display: flex;
     background: var(--color-bg-hover);
-    border-radius: var(--radius-md);
-    padding: 2px;
+    border-radius: var(--radius-lg);
+    padding: 3px;
+    border: 1px solid var(--color-border-light);
 }
 
 .langBtn {
-    padding: 4px 10px;
-    font-size: var(--font-size-xs);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     border: none;
     background: transparent;
     color: var(--color-text-tertiary);
     cursor: pointer;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.langBtn:hover {
+    color: var(--color-text);
+    background: var(--color-bg-elevated);
 }
 
 .langBtn.langActive {
@@ -80,7 +90,16 @@
     box-shadow: var(--shadow-sm);
 }
 
-/* Icon buttons */
+.langFlag {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.langText {
+    letter-spacing: 0.03em;
+}
+
+/* ===== Icon buttons ===== */
 .iconBtn {
     position: relative;
     width: 36px;
@@ -167,8 +186,23 @@
         font-size: var(--font-size-sm);
     }
 
+    /* Language toggle — stays visible on mobile, just tighter */
     .langToggle {
-        display: none;
+        padding: 2px;
+    }
+
+    .langBtn {
+        padding: 5px 8px;
+        font-size: var(--font-size-xs);
+        gap: 3px;
+    }
+
+    .langFlag {
+        font-size: 0.85rem;
+    }
+
+    .langText {
+        font-size: 11px;
     }
 
     .iconBtn {

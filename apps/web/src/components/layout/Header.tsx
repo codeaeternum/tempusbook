@@ -29,19 +29,23 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
                         <div className={styles.desktopActions}>{actions}</div>
                     )}
 
-                    {/* Language toggle */}
+                    {/* Language toggle — segmented control */}
                     <div className={styles.langToggle}>
                         <button
                             className={`${styles.langBtn} ${locale === 'es' ? styles.langActive : ''}`}
                             onClick={() => setLocale('es')}
+                            aria-label="Español"
                         >
-                            ES
+                            <span className={styles.langFlag}>🇲🇽</span>
+                            <span className={styles.langText}>ES</span>
                         </button>
                         <button
                             className={`${styles.langBtn} ${locale === 'en' ? styles.langActive : ''}`}
                             onClick={() => setLocale('en')}
+                            aria-label="English"
                         >
-                            EN
+                            <span className={styles.langFlag}>🇺🇸</span>
+                            <span className={styles.langText}>EN</span>
                         </button>
                     </div>
 
