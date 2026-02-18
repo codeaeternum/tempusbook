@@ -251,6 +251,12 @@ const translations = {
         stock_alert: '⚠️ Stock bajo',
         name_placeholder_product: 'Ej: Cera para cabello',
         description_placeholder_product: 'Descripción del producto...',
+        barcode: 'Código de barras',
+        scan_barcode: 'Escanear código',
+        scanner_coming_soon: 'Escáner próximamente',
+        product_image: 'Imagen del producto',
+        click_to_upload: 'Clic para subir',
+        stock: 'Stock',
 
         // Calendar event detail
         staff_label: 'Staff',
@@ -507,6 +513,12 @@ const translations = {
         stock_alert: '⚠️ Low stock',
         name_placeholder_product: 'E.g. Hair Wax',
         description_placeholder_product: 'Product description...',
+        barcode: 'Barcode',
+        scan_barcode: 'Scan barcode',
+        scanner_coming_soon: 'Scanner coming soon',
+        product_image: 'Product image',
+        click_to_upload: 'Click to upload',
+        stock: 'Stock',
 
         // Calendar event detail
         staff_label: 'Staff',

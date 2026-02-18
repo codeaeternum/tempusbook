@@ -275,8 +275,52 @@
 
 .cardHeader {
     display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+}
+
+.productImage {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.productImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.productImagePlaceholder {
+    background: var(--color-bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.cardHeaderInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-1);
+}
+
+.barcodeRow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    font-family: monospace;
+    margin-top: 2px;
+}
+
+.barcodeRow svg {
+    opacity: 0.5;
 }
 
 .cardTitleRow {
@@ -770,6 +814,107 @@
     border-top: 1px solid var(--color-border-light);
 }
 
+/* -------- Barcode Input + Scan Button -------- */
+.barcodeInputRow {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.barcodeInputRow .formInput {
+    flex: 1;
+    font-family: monospace;
+}
+
+.scanBtn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.scanBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+
+/* -------- Image Upload Zone -------- */
+.imageUploadZone {
+    min-height: 80px;
+}
+
+.imageDropArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 80px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.imageDropArea:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+
+.imageDropIcon {
+    font-size: 1.4rem;
+}
+
+.imageDropText {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.imagePreview {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.imagePreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.imageRemoveBtn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+}
+
+.imageRemoveBtn:hover {
+    background: hsl(0, 65%, 50%);
+}
+
 /* -------- Responsive -------- */
 @media (max-width: 1024px) {
     .productGrid {
@@ -824,6 +969,10 @@
         font-size: var(--font-size-lg);
     }
 
+    .productGrid {
+        padding-bottom: 80px;
+    }
+
     .cardMetrics {
         gap: var(--space-2);
     }
@@ -831,5 +980,22 @@
     .stockRow {
         flex-wrap: wrap;
         gap: var(--space-2);
+    }
+
+    .stockBtn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .stockValue {
+        width: 44px;
+        line-height: 36px;
+        font-size: var(--font-size-base);
+    }
+
+    .productImage {
+        width: 48px;
+        height: 48px;
     }
 }

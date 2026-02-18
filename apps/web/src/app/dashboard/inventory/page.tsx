@@ -12,6 +12,7 @@ interface Product {
     description: string;
     category: ProductCategory;
     sku: string;
+    barcode: string;
     costPrice: number;
     sellPrice: number;
     stock: number;
@@ -26,43 +27,47 @@ type ProductCategory = 'hair_care' | 'styling' | 'beard_care' | 'tools' | 'skinc
 const INITIAL_PRODUCTS: Product[] = [
     {
         id: 'p1', name: 'Cera para Cabello', description: 'Cera de fijación media con acabado mate. Ideal para estilos texturizados.',
-        category: 'styling', sku: 'STY-001', costPrice: 95, sellPrice: 180, stock: 24, minStock: 5, isActive: true,
+        category: 'styling', sku: 'STY-001', barcode: '7501234567890', costPrice: 95, sellPrice: 180, stock: 24, minStock: 5, isActive: true,
+        image: 'https://images.unsplash.com/photo-1585751119414-ef2636f8aede?w=200&h=200&fit=crop',
     },
     {
         id: 'p2', name: 'Shampoo Profesional', description: 'Shampoo sin sulfatos para uso profesional. Hidrata y fortalece.',
-        category: 'hair_care', sku: 'HC-001', costPrice: 140, sellPrice: 280, stock: 18, minStock: 8, isActive: true,
+        category: 'hair_care', sku: 'HC-001', barcode: '7501234567891', costPrice: 140, sellPrice: 280, stock: 18, minStock: 8, isActive: true,
+        image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=200&h=200&fit=crop',
     },
     {
         id: 'p3', name: 'Aceite para Barba', description: 'Mezcla de aceites esenciales: argán, jojoba y vitamina E.',
-        category: 'beard_care', sku: 'BC-001', costPrice: 120, sellPrice: 250, stock: 15, minStock: 5, isActive: true,
+        category: 'beard_care', sku: 'BC-001', barcode: '7501234567892', costPrice: 120, sellPrice: 250, stock: 15, minStock: 5, isActive: true,
+        image: 'https://images.unsplash.com/photo-1621607512022-6aecc834bae0?w=200&h=200&fit=crop',
     },
     {
         id: 'p4', name: 'Tónico Capilar', description: 'Tratamiento anticaída con biotina y saw palmetto.',
-        category: 'hair_care', sku: 'HC-002', costPrice: 180, sellPrice: 320, stock: 3, minStock: 5, isActive: true,
+        category: 'hair_care', sku: 'HC-002', barcode: '7501234567893', costPrice: 180, sellPrice: 320, stock: 3, minStock: 5, isActive: true,
     },
     {
         id: 'p5', name: 'Cepillo de Barba', description: 'Cerdas naturales de jabalí. Mango de madera de haya.',
-        category: 'tools', sku: 'TL-001', costPrice: 75, sellPrice: 150, stock: 32, minStock: 10, isActive: true,
+        category: 'tools', sku: 'TL-001', barcode: '7501234567894', costPrice: 75, sellPrice: 150, stock: 32, minStock: 10, isActive: true,
     },
     {
         id: 'p6', name: 'Pomada Water-Based', description: 'Fijación fuerte con brillo. Se lava fácilmente con agua.',
-        category: 'styling', sku: 'STY-002', costPrice: 85, sellPrice: 160, stock: 0, minStock: 5, isActive: true,
+        category: 'styling', sku: 'STY-002', barcode: '7501234567895', costPrice: 85, sellPrice: 160, stock: 0, minStock: 5, isActive: true,
+        image: 'https://images.unsplash.com/photo-1597854710380-aa3f9bfdb09d?w=200&h=200&fit=crop',
     },
     {
         id: 'p7', name: 'Bálsamo para Barba', description: 'Suaviza y da forma. Con manteca de karité y aceite de coco.',
-        category: 'beard_care', sku: 'BC-002', costPrice: 100, sellPrice: 200, stock: 12, minStock: 5, isActive: true,
+        category: 'beard_care', sku: 'BC-002', barcode: '7501234567896', costPrice: 100, sellPrice: 200, stock: 12, minStock: 5, isActive: true,
     },
     {
         id: 'p8', name: 'Aftershave Gel', description: 'Gel calmante post-rasurado con aloe vera y mentol.',
-        category: 'skincare', sku: 'SK-001', costPrice: 90, sellPrice: 175, stock: 8, minStock: 5, isActive: true,
+        category: 'skincare', sku: 'SK-001', barcode: '7501234567897', costPrice: 90, sellPrice: 175, stock: 8, minStock: 5, isActive: true,
     },
     {
         id: 'p9', name: 'Tijeras Profesionales', description: 'Acero japonés 440C. Ergonómicas, 6 pulgadas.',
-        category: 'tools', sku: 'TL-002', costPrice: 850, sellPrice: 1500, stock: 4, minStock: 2, isActive: true,
+        category: 'tools', sku: 'TL-002', barcode: '7501234567898', costPrice: 850, sellPrice: 1500, stock: 4, minStock: 2, isActive: true,
     },
     {
         id: 'p10', name: 'Gel Fijador Extra', description: 'Gel de fijación extra fuerte. Sin residuos ni descamación.',
-        category: 'styling', sku: 'STY-003', costPrice: 65, sellPrice: 120, stock: 1, minStock: 8, isActive: false,
+        category: 'styling', sku: 'STY-003', barcode: '7501234567899', costPrice: 65, sellPrice: 120, stock: 1, minStock: 8, isActive: false,
     },
 ];
 
@@ -100,16 +105,18 @@ interface ProductForm {
     description: string;
     category: ProductCategory;
     sku: string;
+    barcode: string;
     costPrice: number;
     sellPrice: number;
     stock: number;
     minStock: number;
     isActive: boolean;
+    image: string;
 }
 
 const EMPTY_FORM: ProductForm = {
-    name: '', description: '', category: 'hair_care', sku: '',
-    costPrice: 0, sellPrice: 0, stock: 0, minStock: 5, isActive: true,
+    name: '', description: '', category: 'hair_care', sku: '', barcode: '',
+    costPrice: 0, sellPrice: 0, stock: 0, minStock: 5, isActive: true, image: '',
 };
 
 export default function InventoryPage() {
@@ -193,11 +200,13 @@ export default function InventoryPage() {
             description: product.description,
             category: product.category,
             sku: product.sku,
+            barcode: product.barcode || '',
             costPrice: product.costPrice,
             sellPrice: product.sellPrice,
             stock: product.stock,
             minStock: product.minStock,
             isActive: product.isActive,
+            image: product.image || '',
         });
         setShowModal(true);
     };
@@ -345,28 +354,47 @@ export default function InventoryPage() {
                                 />
 
                                 <div className={styles.cardBody}>
-                                    {/* Header */}
+                                    {/* Header with image */}
                                     <div className={styles.cardHeader}>
-                                        <div className={styles.cardTitleRow}>
-                                            <h3 className={styles.cardTitle}>{product.name}</h3>
-                                            {stockStatus === 'out' && (
-                                                <span className={styles.outBadge}>🚫 {t('out_of_stock')}</span>
+                                        {product.image ? (
+                                            <div className={styles.productImage}>
+                                                <img src={product.image} alt={product.name} />
+                                            </div>
+                                        ) : (
+                                            <div className={`${styles.productImage} ${styles.productImagePlaceholder}`}>
+                                                <span>{CATEGORIES.find(c => c.key === product.category)?.icon || '📦'}</span>
+                                            </div>
+                                        )}
+                                        <div className={styles.cardHeaderInfo}>
+                                            <div className={styles.cardTitleRow}>
+                                                <h3 className={styles.cardTitle}>{product.name}</h3>
+                                                {stockStatus === 'out' && (
+                                                    <span className={styles.outBadge}>🚫 {t('out_of_stock')}</span>
+                                                )}
+                                                {stockStatus === 'low' && (
+                                                    <span className={styles.lowBadge}>⚠️ {t('low_stock')}</span>
+                                                )}
+                                            </div>
+                                            <div className={styles.cardMeta}>
+                                                <span
+                                                    className={styles.categoryChip}
+                                                    style={{
+                                                        color: CATEGORY_COLORS[product.category],
+                                                        background: `${CATEGORY_COLORS[product.category]}18`,
+                                                    }}
+                                                >
+                                                    {categoryLabel(product.category)}
+                                                </span>
+                                                <span className={styles.skuChip}>{product.sku}</span>
+                                            </div>
+                                            {product.barcode && (
+                                                <div className={styles.barcodeRow}>
+                                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M3 3h3v18H3zM9 3h1v18H9zM13 3h2v18h-2zM18 3h3v18h-3z" />
+                                                    </svg>
+                                                    <span>{product.barcode}</span>
+                                                </div>
                                             )}
-                                            {stockStatus === 'low' && (
-                                                <span className={styles.lowBadge}>⚠️ {t('low_stock')}</span>
-                                            )}
-                                        </div>
-                                        <div className={styles.cardMeta}>
-                                            <span
-                                                className={styles.categoryChip}
-                                                style={{
-                                                    color: CATEGORY_COLORS[product.category],
-                                                    background: `${CATEGORY_COLORS[product.category]}18`,
-                                                }}
-                                            >
-                                                {categoryLabel(product.category)}
-                                            </span>
-                                            <span className={styles.skuChip}>{product.sku}</span>
                                         </div>
                                     </div>
 
@@ -396,7 +424,7 @@ export default function InventoryPage() {
                                                 −
                                             </button>
                                             <span className={`${styles.stockValue} ${stockStatus === 'out' ? styles.stockDanger :
-                                                    stockStatus === 'low' ? styles.stockWarn : ''
+                                                stockStatus === 'low' ? styles.stockWarn : ''
                                                 }`}>
                                                 {product.stock}
                                             </span>
@@ -416,7 +444,7 @@ export default function InventoryPage() {
                                     <div className={styles.stockBar}>
                                         <div
                                             className={`${styles.stockBarFill} ${stockStatus === 'out' ? styles.stockBarDanger :
-                                                    stockStatus === 'low' ? styles.stockBarWarn : styles.stockBarOk
+                                                stockStatus === 'low' ? styles.stockBarWarn : styles.stockBarOk
                                                 }`}
                                             style={{ width: `${Math.min(100, (product.stock / (product.minStock * 3)) * 100)}%` }}
                                         />
@@ -497,6 +525,62 @@ export default function InventoryPage() {
                                         onChange={e => updateField('sku', e.target.value)}
                                         placeholder="SKU-001"
                                     />
+                                </div>
+                            </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('barcode')}</label>
+                                    <div className={styles.barcodeInputRow}>
+                                        <input
+                                            className={styles.formInput}
+                                            value={form.barcode}
+                                            onChange={e => updateField('barcode', e.target.value)}
+                                            placeholder="7501234567890"
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.scanBtn}
+                                            title={t('scan_barcode')}
+                                            onClick={() => showToast(t('scanner_coming_soon'))}
+                                        >
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" />
+                                                <line x1="7" y1="12" x2="17" y2="12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>{t('product_image')}</label>
+                                    <div className={styles.imageUploadZone}>
+                                        {form.image ? (
+                                            <div className={styles.imagePreview}>
+                                                <img src={form.image} alt="" />
+                                                <button
+                                                    type="button"
+                                                    className={styles.imageRemoveBtn}
+                                                    onClick={() => updateField('image', '')}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <label className={styles.imageDropArea}>
+                                                <span className={styles.imageDropIcon}>📷</span>
+                                                <span className={styles.imageDropText}>{t('click_to_upload')}</span>
+                                                <input
+                                                    type="file" accept="image/*" style={{ display: 'none' }}
+                                                    onChange={e => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            const url = URL.createObjectURL(file);
+                                                            updateField('image', url);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className={styles.formGroup}>
