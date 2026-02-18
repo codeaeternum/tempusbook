@@ -154,6 +154,8 @@ const translations = {
         view_profile: 'Ver perfil',
         showing_results: 'Mostrando resultados',
         reschedule: 'Reagendar',
+        call: 'Llamar',
+        send_email: 'Enviar correo',
     },
 
     en: {
@@ -305,6 +307,8 @@ const translations = {
         view_profile: 'View profile',
         showing_results: 'Showing results',
         reschedule: 'Reschedule',
+        call: 'Call',
+        send_email: 'Send email',
     },
 } as const;
 

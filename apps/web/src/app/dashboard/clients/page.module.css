@@ -285,8 +285,137 @@
 
 .contactCell {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.contactActions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.contactBtn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.table tbody tr:hover .contactBtn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.contactBtn.whatsapp {
+    color: #25D366;
+    background: rgba(37, 211, 102, 0.1);
+}
+
+.contactBtn.whatsapp:hover {
+    background: #25D366;
+    color: white;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+}
+
+.contactBtn.call {
+    color: var(--color-info);
+    background: var(--color-info-bg);
+}
+
+.contactBtn.call:hover {
+    background: var(--color-info);
+    color: white;
+    box-shadow: 0 2px 8px rgba(116, 185, 255, 0.35);
+}
+
+.contactBtn.email {
+    color: var(--color-text-secondary);
+    background: var(--color-bg-hover);
+}
+
+.contactBtn.email:hover {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 2px 8px var(--color-primary-bg);
+}
+
+/* Profile panel contact links */
+.contactLink {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.contactLink:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Quick contact row in profile panel */
+.quickContactRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+}
+
+.quickContactBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 10px var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.whatsappBtn {
+    background: rgba(37, 211, 102, 0.1);
+    color: #25D366;
+    border: 1px solid rgba(37, 211, 102, 0.25);
+}
+
+.whatsappBtn:hover {
+    background: #25D366;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    transform: translateY(-1px);
+}
+
+.callBtn {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid rgba(116, 185, 255, 0.25);
+}
+
+.callBtn:hover {
+    background: var(--color-info);
+    color: white;
+    box-shadow: 0 4px 12px rgba(116, 185, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.emailBtn {
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+.emailBtn:hover {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+    transform: translateY(-1px);
 }
 
 .contactPhone {
