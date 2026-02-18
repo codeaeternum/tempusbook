@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
     { key: 'appointments', icon: '🕐', path: '/dashboard/appointments' },
     { key: 'clients', icon: '👥', path: '/dashboard/clients' },
     { key: 'services', icon: '💼', path: '/dashboard/services' },
+    { key: 'inventory', icon: '📦', path: '/dashboard/inventory' },
     { key: 'team', icon: '🤝', path: '/dashboard/team' },
     { key: 'payments', icon: '💳', path: '/dashboard/payments' },
     { key: 'gallery', icon: '🖼️', path: '/dashboard/gallery' },
