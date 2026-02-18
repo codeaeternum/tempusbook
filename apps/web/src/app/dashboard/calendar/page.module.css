@@ -114,15 +114,12 @@
 }
 
 .timeGrid {
-    display: flex;
-    flex-direction: column;
+    position: relative;
 }
 
 .timeRow {
     display: flex;
-    min-height: 60px;
     border-bottom: 1px solid var(--color-border-light);
-    position: relative;
 }
 
 .timeLabel {
@@ -138,29 +135,35 @@
 
 .timeSlot {
     flex: 1;
-    position: relative;
     border-left: 1px solid var(--color-border-light);
-    min-height: 60px;
+}
+
+/* Events overlay — positioned over the full time grid, offset by time label */
+.eventsLayer {
+    position: absolute;
+    top: 0;
+    left: 57px;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
 }
 
 /* Event blocks */
 .eventBlock {
     position: absolute;
-    left: 4px;
-    right: 4px;
-    top: var(--event-top, 0px);
-    height: var(--event-height, 36px);
     background: color-mix(in srgb, var(--event-color) 15%, var(--color-bg-surface));
     border-left: 3px solid var(--event-color);
     border-radius: var(--radius-sm);
     padding: 4px 8px;
     cursor: pointer;
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
     gap: 1px;
     overflow: hidden;
-    transition: all var(--transition-fast);
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
     border: none;
+    border-left: 3px solid var(--event-color);
     text-align: left;
     z-index: 1;
 }
@@ -168,8 +171,7 @@
 .eventBlock:hover {
     transform: scale(1.02);
     box-shadow: var(--shadow-md);
-    z-index: 2;
-    border-left: 3px solid var(--event-color);
+    z-index: 10;
 }
 
 .eventTime {

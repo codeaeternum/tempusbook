@@ -21,7 +21,10 @@ interface CalendarEvent {
     color: string;
 }
 
-const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7:00 AM – 8:00 PM
+const HOUR_HEIGHT = 64; // px per hour row
+const START_HOUR = 7;
+const END_HOUR = 21;
+const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => i + START_HOUR);
 
 const STATUS_COLORS: Record<string, string> = {
     confirmed: 'var(--color-success)',
@@ -48,7 +51,7 @@ function isSameDay(a: Date, b: Date): boolean {
 function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     d.setDate(diff);
     return d;
 }
@@ -56,13 +59,12 @@ function getWeekStart(date: Date): Date {
 function getMonthDays(year: number, month: number): Date[] {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startDay = firstDay.getDay() === 0 ? -5 : 2 - firstDay.getDay(); // Monday start
+    const startDay = firstDay.getDay() === 0 ? -5 : 2 - firstDay.getDay();
     const days: Date[] = [];
 
     for (let i = startDay - 1; i <= lastDay.getDate() + (6 - lastDay.getDay()); i++) {
         days.push(new Date(year, month, i));
     }
-    // Ensure full weeks
     while (days.length % 7 !== 0) {
         days.push(new Date(year, month, days[days.length - 1].getDate() + 1));
     }
@@ -73,61 +75,141 @@ function formatTime(date: Date): string {
     return date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+// ─── Collision detection for overlapping events ───
+
+interface LayoutEvent extends CalendarEvent {
+    top: number;      // px from grid top
+    height: number;   // px height
+    left: number;     // % from left (0-100)
+    width: number;    // % width
+}
+
+function layoutEvents(events: CalendarEvent[]): LayoutEvent[] {
+    if (events.length === 0) return [];
+
+    const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime());
+
+    // Group into overlapping clusters
+    const clusters: CalendarEvent[][] = [];
+    let currentCluster: CalendarEvent[] = [];
+    let clusterEnd = 0;
+
+    for (const evt of sorted) {
+        const evtStartMin = evt.start.getHours() * 60 + evt.start.getMinutes();
+        if (currentCluster.length === 0 || evtStartMin < clusterEnd) {
+            currentCluster.push(evt);
+            const evtEndMin = evt.end.getHours() * 60 + evt.end.getMinutes();
+            clusterEnd = Math.max(clusterEnd, evtEndMin);
+        } else {
+            clusters.push(currentCluster);
+            currentCluster = [evt];
+            clusterEnd = evt.end.getHours() * 60 + evt.end.getMinutes();
+        }
+    }
+    if (currentCluster.length > 0) clusters.push(currentCluster);
+
+    // Layout each cluster
+    const result: LayoutEvent[] = [];
+
+    for (const cluster of clusters) {
+        // Assign columns — greedy algorithm
+        const columns: CalendarEvent[][] = [];
+
+        for (const evt of cluster) {
+            const evtStartMin = evt.start.getHours() * 60 + evt.start.getMinutes();
+            let placed = false;
+            for (const col of columns) {
+                const lastInCol = col[col.length - 1];
+                const lastEndMin = lastInCol.end.getHours() * 60 + lastInCol.end.getMinutes();
+                if (evtStartMin >= lastEndMin) {
+                    col.push(evt);
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) {
+                columns.push([evt]);
+            }
+        }
+
+        const numCols = columns.length;
+        for (let colIdx = 0; colIdx < numCols; colIdx++) {
+            for (const evt of columns[colIdx]) {
+                const startMin = evt.start.getHours() * 60 + evt.start.getMinutes();
+                const endMin = evt.end.getHours() * 60 + evt.end.getMinutes();
+                const durationMin = endMin - startMin;
+
+                result.push({
+                    ...evt,
+                    top: ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT,
+                    height: Math.max((durationMin / 60) * HOUR_HEIGHT, 28),
+                    left: (colIdx / numCols) * 100,
+                    width: (1 / numCols) * 100,
+                });
+            }
+        }
+    }
+
+    return result;
+}
+
 // ─── Mock data ────────────────────────────────────────────
 
 function generateMockEvents(referenceDate: Date): CalendarEvent[] {
-    const today = new Date(referenceDate);
+    const y = referenceDate.getFullYear();
+    const m = referenceDate.getMonth();
+    const d = referenceDate.getDate();
+
     const events: CalendarEvent[] = [
         {
             id: '1', title: 'Corte + Barba', client: 'María García', service: 'Corte + Barba',
-            staff: 'Carlos', start: new Date(today.setHours(9, 0)), end: new Date(today.setHours(9, 45)),
+            staff: 'Carlos', start: new Date(y, m, d, 9, 0), end: new Date(y, m, d, 9, 45),
             status: 'confirmed', color: STAFF_COLORS[0],
         },
         {
             id: '2', title: 'Corte Clásico', client: 'Juan Pérez', service: 'Corte Clásico',
-            staff: 'Carlos', start: new Date(today.setHours(10, 0)), end: new Date(today.setHours(10, 30)),
+            staff: 'Carlos', start: new Date(y, m, d, 10, 0), end: new Date(y, m, d, 10, 30),
             status: 'pending', color: STAFF_COLORS[0],
         },
         {
             id: '3', title: 'Tratamiento Capilar', client: 'Ana López', service: 'Tratamiento',
-            staff: 'Sofía', start: new Date(today.setHours(11, 30)), end: new Date(today.setHours(12, 30)),
+            staff: 'Sofía', start: new Date(y, m, d, 11, 30), end: new Date(y, m, d, 12, 30),
             status: 'confirmed', color: STAFF_COLORS[1],
         },
         {
             id: '4', title: 'Barba Completa', client: 'Carlos Ruiz', service: 'Barba',
-            staff: 'Carlos', start: new Date(today.setHours(13, 0)), end: new Date(today.setHours(13, 30)),
+            staff: 'Carlos', start: new Date(y, m, d, 13, 0), end: new Date(y, m, d, 13, 30),
             status: 'in_progress', color: STAFF_COLORS[0],
         },
         {
             id: '5', title: 'Corte Fade', client: 'Roberto Díaz', service: 'Corte Fade',
-            staff: 'Miguel', start: new Date(today.setHours(14, 30)), end: new Date(today.setHours(15, 15)),
+            staff: 'Miguel', start: new Date(y, m, d, 14, 30), end: new Date(y, m, d, 15, 15),
             status: 'pending', color: STAFF_COLORS[2],
         },
         {
             id: '6', title: 'Corte + Cejas', client: 'Laura Méndez', service: 'Corte + Cejas',
-            staff: 'Sofía', start: new Date(today.setHours(15, 0)), end: new Date(today.setHours(15, 45)),
+            staff: 'Sofía', start: new Date(y, m, d, 15, 0), end: new Date(y, m, d, 15, 45),
             status: 'confirmed', color: STAFF_COLORS[1],
         },
         {
             id: '7', title: 'Coloración', client: 'Pedro Sánchez', service: 'Coloración',
-            staff: 'Carlos', start: new Date(today.setHours(16, 0)), end: new Date(today.setHours(17, 30)),
+            staff: 'Carlos', start: new Date(y, m, d, 16, 0), end: new Date(y, m, d, 17, 30),
             status: 'confirmed', color: STAFF_COLORS[0],
         },
     ];
 
-    // Add a few events for tomorrow
-    const tomorrow = addDays(referenceDate, 1);
+    // Events for tomorrow
+    const t2 = addDays(referenceDate, 1);
+    const y2 = t2.getFullYear(), m2 = t2.getMonth(), d2 = t2.getDate();
     events.push(
         {
             id: '8', title: 'Corte Express', client: 'Diego Torres', service: 'Corte Express',
-            staff: 'Miguel', start: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 9, 0),
-            end: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 9, 20),
+            staff: 'Miguel', start: new Date(y2, m2, d2, 9, 0), end: new Date(y2, m2, d2, 9, 20),
             status: 'confirmed', color: STAFF_COLORS[2],
         },
         {
             id: '9', title: 'Barba + Masaje', client: 'Andrés Vega', service: 'Barba Premium',
-            staff: 'Sofía', start: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 11, 0),
-            end: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 12, 0),
+            staff: 'Sofía', start: new Date(y2, m2, d2, 11, 0), end: new Date(y2, m2, d2, 12, 0),
             status: 'pending', color: STAFF_COLORS[1],
         },
     );
@@ -188,41 +270,49 @@ export default function CalendarPage() {
     // ─── Render: Day View ───
     const renderDayView = () => {
         const dayEvents = eventsForDay(currentDate);
+        const laid = layoutEvents(dayEvents);
+        const gridHeight = HOURS.length * HOUR_HEIGHT;
+
         return (
             <div className={styles.dayView}>
-                <div className={styles.timeGrid}>
+                <div className={styles.timeGrid} style={{ height: `${gridHeight}px` }}>
+                    {/* Hour lines */}
                     {HOURS.map(hour => (
-                        <div key={hour} className={styles.timeRow}>
+                        <div
+                            key={hour}
+                            className={styles.timeRow}
+                            style={{ height: `${HOUR_HEIGHT}px` }}
+                        >
                             <div className={styles.timeLabel}>
                                 {String(hour).padStart(2, '0')}:00
                             </div>
-                            <div className={styles.timeSlot}>
-                                {dayEvents
-                                    .filter(e => e.start.getHours() === hour)
-                                    .map(event => {
-                                        const duration = (event.end.getTime() - event.start.getTime()) / 3600000;
-                                        return (
-                                            <button
-                                                key={event.id}
-                                                className={styles.eventBlock}
-                                                style={{
-                                                    '--event-color': event.color,
-                                                    '--event-height': `${Math.max(duration * 60, 36)}px`,
-                                                    '--event-top': `${(event.start.getMinutes() / 60) * 60}px`,
-                                                } as React.CSSProperties}
-                                                onClick={() => setSelectedEvent(event)}
-                                            >
-                                                <span className={styles.eventTime}>
-                                                    {formatTime(event.start)} - {formatTime(event.end)}
-                                                </span>
-                                                <span className={styles.eventTitle}>{event.client}</span>
-                                                <span className={styles.eventService}>{event.service}</span>
-                                            </button>
-                                        );
-                                    })}
-                            </div>
+                            <div className={styles.timeSlot} />
                         </div>
                     ))}
+
+                    {/* Events layer — absolutely positioned over the full grid */}
+                    <div className={styles.eventsLayer}>
+                        {laid.map(event => (
+                            <button
+                                key={event.id}
+                                className={styles.eventBlock}
+                                style={{
+                                    '--event-color': event.color,
+                                    top: `${event.top}px`,
+                                    height: `${event.height}px`,
+                                    left: `${event.left}%`,
+                                    width: `calc(${event.width}% - 4px)`,
+                                } as React.CSSProperties}
+                                onClick={() => setSelectedEvent(event)}
+                            >
+                                <span className={styles.eventTime}>
+                                    {formatTime(event.start)} – {formatTime(event.end)}
+                                </span>
+                                <span className={styles.eventTitle}>{event.client}</span>
+                                <span className={styles.eventService}>{event.service}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
         );
