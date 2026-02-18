@@ -21,7 +21,7 @@ interface Client {
     lastName: string;
     email: string;
     phone: string;
-    status: 'active' | 'inactive' | 'vip';
+    status: 'active' | 'inactive' | 'vip' | 'blocked';
     clientSince: Date;
     totalVisits: number;
     totalSpent: number;
@@ -213,14 +213,14 @@ function getEmailUrl(email: string): string {
 }
 
 // ---- Component ----
-type FilterStatus = 'all' | 'active' | 'inactive' | 'vip';
+type FilterStatus = 'all' | 'active' | 'inactive' | 'vip' | 'blocked';
 
 interface ClientForm {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
-    status: 'active' | 'inactive' | 'vip';
+    status: 'active' | 'inactive' | 'vip' | 'blocked';
     notes: string;
 }
 
@@ -235,6 +235,7 @@ const EMPTY_FORM: ClientForm = {
 
 export default function ClientsPage() {
     const { t, locale } = useLocale();
+    const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS);
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<FilterStatus>('all');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -244,8 +245,18 @@ export default function ClientsPage() {
     const [editingClient, setEditingClient] = useState<Client | null>(null);
     const [form, setForm] = useState<ClientForm>(EMPTY_FORM);
 
+    // Toast
+    const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    const showToast = (message: string) => {
+        setToast({ message, visible: true });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2500);
+    };
+
+    // Confirmation dialog
+    const [confirm, setConfirm] = useState<{ message: string; action: () => void } | null>(null);
+
     const filtered = useMemo(() => {
-        let list = MOCK_CLIENTS;
+        let list = clients;
 
         // Status filter
         if (filter !== 'all') {
@@ -263,15 +274,16 @@ export default function ClientsPage() {
         }
 
         return list;
-    }, [search, filter]);
+    }, [search, filter, clients]);
 
     const stats = useMemo(() => {
-        const total = MOCK_CLIENTS.length;
-        const active = MOCK_CLIENTS.filter(c => c.status === 'active' || c.status === 'vip').length;
-        const vip = MOCK_CLIENTS.filter(c => c.status === 'vip').length;
-        const revenue = MOCK_CLIENTS.reduce((s, c) => s + c.totalSpent, 0);
-        return { total, active, vip, revenue };
-    }, []);
+        const total = clients.length;
+        const active = clients.filter(c => c.status === 'active' || c.status === 'vip').length;
+        const vip = clients.filter(c => c.status === 'vip').length;
+        const blocked = clients.filter(c => c.status === 'blocked').length;
+        const revenue = clients.reduce((s, c) => s + c.totalSpent, 0);
+        return { total, active, vip, blocked, revenue };
+    }, [clients]);
 
     const openCreateModal = () => {
         setEditingClient(null);
@@ -293,7 +305,22 @@ export default function ClientsPage() {
     };
 
     const handleSave = () => {
-        // In production, this would call an API
+        if (editingClient) {
+            setClients(prev => prev.map(c =>
+                c.id === editingClient.id ? { ...c, ...form } : c
+            ));
+        } else {
+            const newClient: Client = {
+                id: Date.now().toString(),
+                ...form,
+                clientSince: new Date(),
+                totalVisits: 0,
+                totalSpent: 0,
+                lastVisit: null,
+                visits: [],
+            };
+            setClients(prev => [...prev, newClient]);
+        }
         setShowModal(false);
         setEditingClient(null);
         setForm(EMPTY_FORM);
@@ -301,6 +328,30 @@ export default function ClientsPage() {
 
     const updateField = (field: keyof ClientForm, value: string) => {
         setForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const blockClient = (clientId: string) => {
+        setClients(prev => prev.map(c => {
+            if (c.id === clientId) {
+                const newStatus = c.status === 'blocked' ? 'active' : 'blocked';
+                showToast(newStatus === 'blocked' ? t('client_blocked') : t('client_unblocked'));
+                return { ...c, status: newStatus } as Client;
+            }
+            return c;
+        }));
+        setSelectedClient(null);
+    };
+
+    const deleteClient = (clientId: string) => {
+        setConfirm({
+            message: t('confirm_delete_client'),
+            action: () => {
+                setClients(prev => prev.filter(c => c.id !== clientId));
+                setSelectedClient(null);
+                showToast(t('client_deleted'));
+                setConfirm(null);
+            },
+        });
     };
 
     return (
@@ -360,13 +411,14 @@ export default function ClientsPage() {
                         />
                     </div>
                     <div className={styles.filterGroup}>
-                        {(['all', 'active', 'vip', 'inactive'] as FilterStatus[]).map(f => (
+                        {(['all', 'active', 'vip', 'inactive', 'blocked'] as FilterStatus[]).map(f => (
                             <button
                                 key={f}
-                                className={`${styles.filterBtn} ${filter === f ? styles.filterBtnActive : ''}`}
+                                className={`${styles.filterBtn} ${filter === f ? styles.filterBtnActive : ''} ${f === 'blocked' ? styles.filterBtnBlocked : ''}`}
                                 onClick={() => setFilter(f)}
                             >
-                                {f === 'all' ? t('all') : t(f)}
+                                {f === 'blocked' ? `🚫 ${t('blocked')}` : f === 'all' ? t('all') : t(f)}
+                                {f === 'blocked' && stats.blocked > 0 && ` (${stats.blocked})`}
                             </button>
                         ))}
                     </div>
@@ -406,7 +458,8 @@ export default function ClientsPage() {
                                         <td>
                                             <span className={`${styles.statusBadge} ${client.status === 'active' ? styles.statusActive :
                                                 client.status === 'vip' ? styles.statusVip :
-                                                    styles.statusInactive
+                                                    client.status === 'blocked' ? styles.statusBlocked :
+                                                        styles.statusInactive
                                                 }`}>
                                                 <span className={styles.statusDot} />
                                                 {t(client.status as any)}
@@ -455,12 +508,28 @@ export default function ClientsPage() {
                                             {formatDate(client.lastVisit, locale)}
                                         </td>
                                         <td>
-                                            <button
-                                                className={styles.actionBtn}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedClient(client); }}
-                                            >
-                                                {t('view_profile')}
-                                            </button>
+                                            <div className={styles.tableActions}>
+                                                <button
+                                                    className={styles.actionBtn}
+                                                    onClick={(e) => { e.stopPropagation(); setSelectedClient(client); }}
+                                                >
+                                                    {t('view_profile')}
+                                                </button>
+                                                <button
+                                                    className={`${styles.actionBtnIcon} ${client.status === 'blocked' ? styles.unblockBtn : styles.blockBtn}`}
+                                                    title={client.status === 'blocked' ? t('unblock_client') : t('block_client')}
+                                                    onClick={(e) => { e.stopPropagation(); blockClient(client.id); }}
+                                                >
+                                                    {client.status === 'blocked' ? '✅' : '🚫'}
+                                                </button>
+                                                <button
+                                                    className={`${styles.actionBtnIcon} ${styles.deleteBtn}`}
+                                                    title={t('delete_client')}
+                                                    onClick={(e) => { e.stopPropagation(); deleteClient(client.id); }}
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -468,7 +537,7 @@ export default function ClientsPage() {
                         </table>
                     </div>
                     <div className={styles.tableFooter}>
-                        <span>{t('showing_results')}: {filtered.length} {t('of')} {MOCK_CLIENTS.length}</span>
+                        <span>{t('showing_results')}: {filtered.length} {t('of')} {clients.length}</span>
                     </div>
                 </div>
 
@@ -492,7 +561,8 @@ export default function ClientsPage() {
                                 </div>
                                 <span className={`${styles.statusBadge} ${client.status === 'active' ? styles.statusActive :
                                     client.status === 'vip' ? styles.statusVip :
-                                        styles.statusInactive
+                                        client.status === 'blocked' ? styles.statusBlocked :
+                                            styles.statusInactive
                                     }`}>
                                     <span className={styles.statusDot} />
                                     {t(client.status as any)}
@@ -542,11 +612,23 @@ export default function ClientsPage() {
                                 >
                                     ✏️
                                 </button>
+                                <button
+                                    className={`${styles.mobileEditBtn} ${client.status === 'blocked' ? styles.unblockBtn : styles.blockBtn}`}
+                                    onClick={(e) => { e.stopPropagation(); blockClient(client.id); }}
+                                >
+                                    {client.status === 'blocked' ? '✅' : '🚫'}
+                                </button>
+                                <button
+                                    className={`${styles.mobileEditBtn} ${styles.deleteBtn}`}
+                                    onClick={(e) => { e.stopPropagation(); deleteClient(client.id); }}
+                                >
+                                    🗑️
+                                </button>
                             </div>
                         </div>
                     ))}
                     <div className={styles.mobileFooter}>
-                        {t('showing_results')}: {filtered.length} {t('of')} {MOCK_CLIENTS.length}
+                        {t('showing_results')}: {filtered.length} {t('of')} {clients.length}
                     </div>
                 </div>
             </div>
@@ -572,7 +654,8 @@ export default function ClientsPage() {
                                 </div>
                                 <span className={`${styles.statusBadge} ${selectedClient.status === 'active' ? styles.statusActive :
                                     selectedClient.status === 'vip' ? styles.statusVip :
-                                        styles.statusInactive
+                                        selectedClient.status === 'blocked' ? styles.statusBlocked :
+                                            styles.statusInactive
                                     }`}>
                                     <span className={styles.statusDot} />
                                     {t(selectedClient.status as any)}
@@ -688,6 +771,18 @@ export default function ClientsPage() {
                                 ✏️ {t('edit_client')}
                             </button>
                             <button className="btn btn-primary">{t('schedule_appointment')}</button>
+                            <button
+                                className={`${styles.panelBlockBtn} ${selectedClient.status === 'blocked' ? styles.unblockBtn : ''}`}
+                                onClick={() => blockClient(selectedClient.id)}
+                            >
+                                {selectedClient.status === 'blocked' ? `✅ ${t('unblock_client')}` : `🚫 ${t('block_client')}`}
+                            </button>
+                            <button
+                                className={styles.panelDeleteBtn}
+                                onClick={() => deleteClient(selectedClient.id)}
+                            >
+                                🗑️ {t('delete_client')}
+                            </button>
                         </div>
                     </div>
                 </>
@@ -750,12 +845,12 @@ export default function ClientsPage() {
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>{t('status')}</label>
                                 <div className={styles.statusSelect}>
-                                    {(['active', 'vip', 'inactive'] as const).map(s => (
+                                    {(['active', 'vip', 'inactive', 'blocked'] as const).map(s => (
                                         <button
                                             key={s}
                                             type="button"
                                             className={`${styles.statusOption} ${form.status === s ? styles.statusOptionActive : ''} ${s === 'active' ? styles.statusOptGreen :
-                                                s === 'vip' ? styles.statusOptAmber : styles.statusOptGray
+                                                s === 'vip' ? styles.statusOptAmber : s === 'blocked' ? styles.statusOptRed : styles.statusOptGray
                                                 }`}
                                             onClick={() => updateField('status', s)}
                                         >
@@ -786,6 +881,30 @@ export default function ClientsPage() {
                     </div>
                 </>
             )}
+
+            {/* Confirmation Dialog */}
+            {confirm && (
+                <>
+                    <div className={styles.modalOverlay} onClick={() => setConfirm(null)} />
+                    <div className={styles.confirmDialog}>
+                        <div className={styles.confirmIcon}>⚠️</div>
+                        <p className={styles.confirmMessage}>{confirm.message}</p>
+                        <div className={styles.confirmActions}>
+                            <button className="btn btn-secondary" onClick={() => setConfirm(null)}>
+                                {t('cancel')}
+                            </button>
+                            <button className={styles.confirmDeleteBtn} onClick={confirm.action}>
+                                🗑️ {t('delete')}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Toast */}
+            <div className={`${styles.toast} ${toast.visible ? styles.toastVisible : ''}`}>
+                {toast.message}
+            </div>
         </>
     );
 }

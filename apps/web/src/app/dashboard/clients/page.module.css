@@ -292,6 +292,239 @@
     color: hsl(40 70% 65%);
 }
 
+/* Blocked status */
+.statusBlocked .statusDot {
+    background: hsl(0 70% 50%);
+}
+
+.statusBlocked {
+    background: hsl(0 70% 92%);
+    color: hsl(0 60% 35%);
+}
+
+[data-theme="dark"] .statusBlocked {
+    background: hsl(0 40% 18%);
+    color: hsl(0 70% 70%);
+}
+
+/* Table action buttons row */
+.tableActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.actionBtnIcon {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition-fast);
+}
+
+tr:hover .actionBtnIcon {
+    opacity: 1;
+}
+
+.actionBtnIcon:hover {
+    background: var(--color-bg-hover);
+}
+
+.blockBtn:hover {
+    background: hsl(40 80% 92%) !important;
+}
+
+.unblockBtn:hover {
+    background: hsl(152 50% 92%) !important;
+}
+
+.deleteBtn:hover {
+    background: hsl(0 70% 92%) !important;
+}
+
+[data-theme="dark"] .blockBtn:hover {
+    background: hsl(40 40% 18%) !important;
+}
+
+[data-theme="dark"] .unblockBtn:hover {
+    background: hsl(152 40% 18%) !important;
+}
+
+[data-theme="dark"] .deleteBtn:hover {
+    background: hsl(0 40% 18%) !important;
+}
+
+/* Filter button blocked variant */
+.filterBtnBlocked:not(.filterBtnActive):hover {
+    border-color: hsl(0 60% 55%);
+    color: hsl(0 60% 55%);
+}
+
+/* Status option red (blocked) in modal */
+.statusOptRed.statusOptionActive {
+    border-color: hsl(0 60% 55%);
+    background: hsl(0 70% 92%);
+    color: hsl(0 60% 35%);
+}
+
+[data-theme="dark"] .statusOptRed.statusOptionActive {
+    background: hsl(0 40% 18%);
+    color: hsl(0 70% 70%);
+    border-color: hsl(0 60% 45%);
+}
+
+/* Panel block/delete buttons */
+.panelBlockBtn {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid hsl(40 60% 50%);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: hsl(40 60% 45%);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.panelBlockBtn:hover {
+    background: hsl(40 80% 92%);
+}
+
+.panelBlockBtn.unblockBtn {
+    border-color: hsl(152 50% 45%);
+    color: hsl(152 50% 40%);
+}
+
+.panelBlockBtn.unblockBtn:hover {
+    background: hsl(152 50% 92%);
+}
+
+[data-theme="dark"] .panelBlockBtn:hover {
+    background: hsl(40 40% 15%);
+}
+
+[data-theme="dark"] .panelBlockBtn.unblockBtn:hover {
+    background: hsl(152 40% 15%);
+}
+
+.panelDeleteBtn {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid hsl(0 60% 50%);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: hsl(0 60% 50%);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.panelDeleteBtn:hover {
+    background: hsl(0 70% 92%);
+}
+
+[data-theme="dark"] .panelDeleteBtn:hover {
+    background: hsl(0 40% 15%);
+}
+
+/* Confirmation Dialog */
+.confirmDialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    z-index: 201;
+    text-align: center;
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    animation: confirmIn 0.2s ease-out;
+}
+
+@keyframes confirmIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.confirmIcon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-3);
+}
+
+.confirmMessage {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--space-5);
+}
+
+.confirmActions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+}
+
+.confirmDeleteBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: hsl(0 65% 50%);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.confirmDeleteBtn:hover {
+    background: hsl(0 65% 42%);
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 10px 24px;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 9999;
+}
+
+.toastVisible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* Contact cell with action buttons */
 .contactCell {
     display: flex;
