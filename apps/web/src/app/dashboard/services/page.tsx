@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import { useLocale } from '@/providers/LocaleProvider';
 import styles from './page.module.css';
@@ -17,16 +17,20 @@ interface Service {
     id: string;
     name: string;
     description: string;
-    category: ServiceCategory;
+    category: string;
     duration: number; // minutes
     price: number;
     isActive: boolean;
     isPopular: boolean;
     staff: StaffMember[];
-    bookings: number; // total bookings count
+    bookings: number;
 }
 
-type ServiceCategory = 'hair' | 'beard' | 'color' | 'treatment' | 'extras';
+interface Category {
+    key: string;
+    icon: string;
+    isCustom?: boolean;
+}
 
 // ---- Mock Data ----
 const STAFF: StaffMember[] = [
@@ -36,7 +40,15 @@ const STAFF: StaffMember[] = [
     { id: 's4', name: 'Laura', initials: 'LA', color: 'hsl(40, 60%, 50%)' },
 ];
 
-const MOCK_SERVICES: Service[] = [
+const DEFAULT_CATEGORIES: Category[] = [
+    { key: 'hair', icon: '✂️' },
+    { key: 'beard', icon: '🪒' },
+    { key: 'color', icon: '🎨' },
+    { key: 'treatment', icon: '💆' },
+    { key: 'extras', icon: '🧴' },
+];
+
+const INITIAL_SERVICES: Service[] = [
     {
         id: '1', name: 'Corte Clásico', description: 'Corte tradicional con tijera y navaja. Incluye lavado y secado.',
         category: 'hair', duration: 30, price: 250, isActive: true, isPopular: true,
@@ -99,17 +111,7 @@ const MOCK_SERVICES: Service[] = [
     },
 ];
 
-// ---- Category config ----
-const CATEGORIES: { key: ServiceCategory | 'all'; icon: string }[] = [
-    { key: 'all', icon: '✨' },
-    { key: 'hair', icon: '✂️' },
-    { key: 'beard', icon: '🪒' },
-    { key: 'color', icon: '🎨' },
-    { key: 'treatment', icon: '💆' },
-    { key: 'extras', icon: '🧴' },
-];
-
-const CATEGORY_COLORS: Record<ServiceCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
     hair: 'hsl(262, 60%, 55%)',
     beard: 'hsl(210, 60%, 50%)',
     color: 'hsl(340, 60%, 55%)',
@@ -117,16 +119,34 @@ const CATEGORY_COLORS: Record<ServiceCategory, string> = {
     extras: 'hsl(40, 55%, 50%)',
 };
 
+// Palette for custom categories
+const CUSTOM_CATEGORY_COLORS = [
+    'hsl(280, 50%, 55%)',
+    'hsl(190, 60%, 45%)',
+    'hsl(20, 70%, 55%)',
+    'hsl(80, 50%, 45%)',
+    'hsl(310, 50%, 50%)',
+    'hsl(50, 65%, 50%)',
+];
+
+const EMOJI_OPTIONS = ['📦', '💅', '🧖', '🪮', '💇', '🧴', '💊', '🎯', '⭐', '🔧', '🎨', '✨'];
+
 // ---- Helpers ----
 function formatCurrency(amount: number): string {
     return `$${amount.toLocaleString('es-MX')}`;
+}
+
+function getCategoryColor(key: string): string {
+    return CATEGORY_COLORS[key] || CUSTOM_CATEGORY_COLORS[
+        Math.abs(key.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % CUSTOM_CATEGORY_COLORS.length
+    ];
 }
 
 // ---- Component ----
 interface ServiceForm {
     name: string;
     description: string;
-    category: ServiceCategory;
+    category: string;
     duration: number;
     price: number;
     isActive: boolean;
@@ -145,26 +165,55 @@ const EMPTY_FORM: ServiceForm = {
 
 export default function ServicesPage() {
     const { t, locale } = useLocale();
+    const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+    const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
     const [search, setSearch] = useState('');
-    const [activeCategory, setActiveCategory] = useState<ServiceCategory | 'all'>('all');
+    const [activeCategory, setActiveCategory] = useState<string>('all');
     const [showModal, setShowModal] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [form, setForm] = useState<ServiceForm>(EMPTY_FORM);
 
-    const categoryLabel = (key: ServiceCategory | 'all'): string => {
+    // Category management
+    const [showCategoryPopover, setShowCategoryPopover] = useState(false);
+    const [newCatName, setNewCatName] = useState('');
+    const [newCatIcon, setNewCatIcon] = useState('📦');
+    const catPopoverRef = useRef<HTMLDivElement>(null);
+
+    // Toast
+    const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+
+    const showToast = (message: string) => {
+        setToast({ message, visible: true });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2000);
+    };
+
+    // Close category popover on outside click
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (catPopoverRef.current && !catPopoverRef.current.contains(e.target as Node)) {
+                setShowCategoryPopover(false);
+            }
+        }
+        if (showCategoryPopover) {
+            document.addEventListener('mousedown', handleClick);
+            return () => document.removeEventListener('mousedown', handleClick);
+        }
+    }, [showCategoryPopover]);
+
+    const categoryLabel = (key: string): string => {
         if (key === 'all') return t('all_categories');
-        const map: Record<ServiceCategory, string> = {
+        const map: Record<string, string> = {
             hair: t('cat_hair'),
             beard: t('cat_beard'),
             color: t('cat_color'),
             treatment: t('cat_treatment'),
             extras: t('cat_extras'),
         };
-        return map[key];
+        return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
     };
 
     const filtered = useMemo(() => {
-        let list = MOCK_SERVICES;
+        let list = services;
         if (activeCategory !== 'all') {
             list = list.filter(s => s.category === activeCategory);
         }
@@ -176,17 +225,45 @@ export default function ServicesPage() {
             );
         }
         return list;
-    }, [search, activeCategory]);
+    }, [search, activeCategory, services]);
 
     const stats = useMemo(() => {
-        const total = MOCK_SERVICES.length;
-        const active = MOCK_SERVICES.filter(s => s.isActive).length;
-        const prices = MOCK_SERVICES.filter(s => s.isActive).map(s => s.price);
+        const total = services.length;
+        const active = services.filter(s => s.isActive).length;
+        const prices = services.filter(s => s.isActive).map(s => s.price);
         const avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
-        const topService = [...MOCK_SERVICES].sort((a, b) => b.bookings - a.bookings)[0];
+        const topService = [...services].sort((a, b) => b.bookings - a.bookings)[0];
         return { total, active, avgPrice, topService };
-    }, []);
+    }, [services]);
 
+    // ----- Toggle directly on card -----
+    const toggleServiceActive = (serviceId: string) => {
+        setServices(prev => prev.map(s => {
+            if (s.id === serviceId) {
+                const newActive = !s.isActive;
+                showToast(newActive ? t('service_activated') : t('service_deactivated'));
+                return { ...s, isActive: newActive };
+            }
+            return s;
+        }));
+    };
+
+    // ----- Category management -----
+    const addCategory = () => {
+        const key = newCatName.trim().toLowerCase().replace(/\s+/g, '_');
+        if (!key || categories.some(c => c.key === key)) return;
+        setCategories(prev => [...prev, { key, icon: newCatIcon, isCustom: true }]);
+        CATEGORY_COLORS[key] = getCategoryColor(key);
+        setNewCatName('');
+        setNewCatIcon('📦');
+    };
+
+    const deleteCategory = (key: string) => {
+        setCategories(prev => prev.filter(c => c.key !== key));
+        if (activeCategory === key) setActiveCategory('all');
+    };
+
+    // ----- Service CRUD -----
     const openCreate = () => {
         setEditingService(null);
         setForm(EMPTY_FORM);
@@ -208,6 +285,36 @@ export default function ServicesPage() {
     };
 
     const handleSave = () => {
+        if (editingService) {
+            setServices(prev => prev.map(s =>
+                s.id === editingService.id
+                    ? {
+                        ...s,
+                        name: form.name,
+                        description: form.description,
+                        category: form.category,
+                        duration: form.duration,
+                        price: form.price,
+                        isActive: form.isActive,
+                        staff: STAFF.filter(st => form.staffIds.includes(st.id)),
+                    }
+                    : s
+            ));
+        } else {
+            const newService: Service = {
+                id: Date.now().toString(),
+                name: form.name,
+                description: form.description,
+                category: form.category,
+                duration: form.duration,
+                price: form.price,
+                isActive: form.isActive,
+                isPopular: false,
+                staff: STAFF.filter(st => form.staffIds.includes(st.id)),
+                bookings: 0,
+            };
+            setServices(prev => [...prev, newService]);
+        }
         setShowModal(false);
         setEditingService(null);
         setForm(EMPTY_FORM);
@@ -271,7 +378,7 @@ export default function ServicesPage() {
                     </div>
                 </div>
 
-                {/* Search + Categories */}
+                {/* Search */}
                 <div className={styles.toolbar}>
                     <div className={styles.searchBox}>
                         <span className={styles.searchIcon}>🔍</span>
@@ -284,22 +391,106 @@ export default function ServicesPage() {
                     </div>
                 </div>
 
-                <div className={styles.categoryTabs}>
-                    {CATEGORIES.map(cat => (
+                {/* Category Tabs + Manage Button */}
+                <div className={styles.categoryRow}>
+                    <div className={styles.categoryTabs}>
                         <button
-                            key={cat.key}
-                            className={`${styles.categoryTab} ${activeCategory === cat.key ? styles.categoryTabActive : ''}`}
-                            onClick={() => setActiveCategory(cat.key)}
+                            className={`${styles.categoryTab} ${activeCategory === 'all' ? styles.categoryTabActive : ''}`}
+                            onClick={() => setActiveCategory('all')}
                         >
-                            <span className={styles.categoryIcon}>{cat.icon}</span>
-                            {categoryLabel(cat.key)}
-                            {cat.key !== 'all' && (
-                                <span className={styles.categoryCount}>
-                                    {MOCK_SERVICES.filter(s => s.category === cat.key).length}
-                                </span>
-                            )}
+                            <span className={styles.categoryIcon}>✨</span>
+                            {t('all_categories')}
                         </button>
-                    ))}
+                        {categories.map(cat => (
+                            <button
+                                key={cat.key}
+                                className={`${styles.categoryTab} ${activeCategory === cat.key ? styles.categoryTabActive : ''}`}
+                                onClick={() => setActiveCategory(cat.key)}
+                            >
+                                <span className={styles.categoryIcon}>{cat.icon}</span>
+                                {categoryLabel(cat.key)}
+                                <span className={styles.categoryCount}>
+                                    {services.filter(s => s.category === cat.key).length}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Category manage button */}
+                    <div className={styles.categoryManageWrapper} ref={catPopoverRef}>
+                        <button
+                            className={styles.categoryManageBtn}
+                            onClick={() => setShowCategoryPopover(prev => !prev)}
+                            title={t('manage_categories')}
+                        >
+                            ⚙️
+                        </button>
+
+                        {showCategoryPopover && (
+                            <div className={styles.categoryPopover}>
+                                <div className={styles.popoverHeader}>
+                                    <h4>{t('manage_categories')}</h4>
+                                </div>
+                                <div className={styles.popoverBody}>
+                                    {/* Existing categories list */}
+                                    <div className={styles.catList}>
+                                        {categories.map(cat => (
+                                            <div key={cat.key} className={styles.catListItem}>
+                                                <span className={styles.catListIcon}>{cat.icon}</span>
+                                                <span className={styles.catListName}>{categoryLabel(cat.key)}</span>
+                                                <span className={styles.catListCount}>
+                                                    {services.filter(s => s.category === cat.key).length}
+                                                </span>
+                                                {cat.isCustom && (
+                                                    <button
+                                                        className={styles.catDeleteBtn}
+                                                        onClick={() => deleteCategory(cat.key)}
+                                                        title={t('delete_category')}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Add new category form */}
+                                    <div className={styles.catAddForm}>
+                                        <div className={styles.catAddRow}>
+                                            <div className={styles.emojiPicker}>
+                                                <button className={styles.emojiSelected}>{newCatIcon}</button>
+                                                <div className={styles.emojiGrid}>
+                                                    {EMOJI_OPTIONS.map(emoji => (
+                                                        <button
+                                                            key={emoji}
+                                                            className={styles.emojiOption}
+                                                            onClick={() => setNewCatIcon(emoji)}
+                                                        >
+                                                            {emoji}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <input
+                                                className={styles.catNameInput}
+                                                placeholder={t('category_name')}
+                                                value={newCatName}
+                                                onChange={e => setNewCatName(e.target.value)}
+                                                onKeyDown={e => e.key === 'Enter' && addCategory()}
+                                            />
+                                            <button
+                                                className={styles.catAddBtn}
+                                                onClick={addCategory}
+                                                disabled={!newCatName.trim()}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Service Cards Grid */}
@@ -312,7 +503,7 @@ export default function ServicesPage() {
                             {/* Color accent strip */}
                             <div
                                 className={styles.cardAccent}
-                                style={{ background: CATEGORY_COLORS[service.category] }}
+                                style={{ background: getCategoryColor(service.category) }}
                             />
 
                             <div className={styles.cardBody}>
@@ -329,8 +520,8 @@ export default function ServicesPage() {
                                     <span
                                         className={styles.categoryChip}
                                         style={{
-                                            color: CATEGORY_COLORS[service.category],
-                                            background: `${CATEGORY_COLORS[service.category]}18`,
+                                            color: getCategoryColor(service.category),
+                                            background: `${getCategoryColor(service.category)}18`,
                                         }}
                                     >
                                         {categoryLabel(service.category)}
@@ -378,7 +569,7 @@ export default function ServicesPage() {
                                             <input
                                                 type="checkbox"
                                                 checked={service.isActive}
-                                                onChange={() => { }}
+                                                onChange={() => toggleServiceActive(service.id)}
                                             />
                                             <span className={styles.toggleSlider} />
                                         </label>
@@ -406,6 +597,11 @@ export default function ServicesPage() {
                         <p>{t('no_services')}</p>
                     </div>
                 )}
+            </div>
+
+            {/* Toast notification */}
+            <div className={`${styles.toast} ${toast.visible ? styles.toastVisible : ''}`}>
+                {toast.message}
             </div>
 
             {/* Create / Edit Modal */}
@@ -447,8 +643,8 @@ export default function ServicesPage() {
                                         value={form.category}
                                         onChange={e => updateField('category', e.target.value)}
                                     >
-                                        {(['hair', 'beard', 'color', 'treatment', 'extras'] as ServiceCategory[]).map(cat => (
-                                            <option key={cat} value={cat}>{categoryLabel(cat)}</option>
+                                        {categories.map(cat => (
+                                            <option key={cat.key} value={cat.key}>{categoryLabel(cat.key)}</option>
                                         ))}
                                     </select>
                                 </div>

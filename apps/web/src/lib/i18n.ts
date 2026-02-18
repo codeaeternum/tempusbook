@@ -199,6 +199,14 @@ const translations = {
         bookings_count: 'reservas',
         name_placeholder: 'Ej: Corte Clásico',
         description_placeholder: 'Descripción del servicio...',
+        manage_categories: 'Gestionar categorías',
+        add_category: 'Agregar categoría',
+        category_name: 'Nombre de categoría',
+        category_icon: 'Icono',
+        delete_category: 'Eliminar categoría',
+        confirm_delete_category: '¿Eliminar esta categoría?',
+        service_activated: 'Servicio activado',
+        service_deactivated: 'Servicio desactivado',
 
         // Calendar event detail
         staff_label: 'Staff',
@@ -403,6 +411,14 @@ const translations = {
         bookings_count: 'bookings',
         name_placeholder: 'E.g. Classic Cut',
         description_placeholder: 'Service description...',
+        manage_categories: 'Manage categories',
+        add_category: 'Add category',
+        category_name: 'Category name',
+        category_icon: 'Icon',
+        delete_category: 'Delete category',
+        confirm_delete_category: 'Delete this category?',
+        service_activated: 'Service activated',
+        service_deactivated: 'Service deactivated',
 
         // Calendar event detail
         staff_label: 'Staff',
