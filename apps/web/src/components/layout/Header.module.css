@@ -6,13 +6,16 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border-light);
     padding: var(--space-4) var(--space-6);
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .topRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--space-3);
+    max-width: 100%;
 }
 
 .left {
