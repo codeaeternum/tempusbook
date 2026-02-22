@@ -1,0 +1,357 @@
+/* =============================================
+   AeternaSuite — Reports / Analytics
+   ============================================= */
+
+.content {
+    padding: var(--space-8);
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+}
+
+/* Top Bar */
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-5);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.periodGroup {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.periodBtn {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.periodBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.periodActive {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.exportBtn {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.exportBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* KPIs */
+.kpiRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.kpi {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+}
+
+.kpiLabel {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 4px;
+}
+
+.kpiValue {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text);
+}
+
+.kpiChange {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.kpiUp {
+    color: #10b981;
+}
+
+.kpiDown {
+    color: #ef4444;
+}
+
+.kpiSub {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.occupancyBar {
+    height: 6px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.occupancyFill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.4s ease;
+}
+
+/* Main Grid */
+.mainGrid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+/* Panel */
+.panel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-5);
+}
+
+.panelHeader {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.panelHeader h3 {
+    margin: 0;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+/* Bar Chart */
+.chart {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    height: 220px;
+}
+
+.chartCol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.chartValue {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+}
+
+.chartBar {
+    width: 100%;
+    max-width: 48px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: height 0.4s ease;
+    min-height: 8px;
+}
+
+.chartLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Staff Performance */
+.staffList {
+    padding: var(--space-4) var(--space-5);
+}
+
+.staffItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+}
+
+.staffItem:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.staffRank {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    min-width: 32px;
+    text-align: center;
+}
+
+.staffInfo {
+    flex: 1;
+}
+
+.staffName {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.staffMeta {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.staffRevenue {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+/* Service Ranking */
+.serviceGrid {
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.serviceItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.serviceRank {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: rgba(var(--color-primary-rgb), 0.08);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.serviceInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.serviceName {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+.serviceBarWrap {
+    height: 6px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.serviceBar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.4s ease;
+}
+
+.serviceStats {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.serviceStats span {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.serviceRevenue {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text) !important;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .kpiRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mainGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .content {
+        padding: var(--space-4);
+    }
+
+    .topBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chart {
+        height: 160px;
+        gap: var(--space-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .kpiRow {
+        grid-template-columns: 1fr;
+    }
+
+    .serviceItem {
+        flex-wrap: wrap;
+    }
+
+    .serviceStats {
+        width: 100%;
+        text-align: left;
+        display: flex;
+        gap: var(--space-3);
+    }
+}

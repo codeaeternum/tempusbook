@@ -1,5 +1,5 @@
 /* =============================================
-   TempusBook Design System
+   AeternaSuite Design System
    Premium, modern, responsive design tokens
    ============================================= */
 
@@ -40,6 +40,7 @@
 
   /* Neutral Scale */
   --color-bg: #F8F9FC;
+  --color-bg-secondary: #FFFFFF;
   --color-bg-elevated: #FFFFFF;
   --color-bg-surface: #FFFFFF;
   --color-bg-base: #F4F5F9;
@@ -122,7 +123,7 @@
   --sidebar-width: 260px;
   --sidebar-collapsed: 72px;
   --header-height: 64px;
-  --max-content-width: 1280px;
+  --max-content-width: 2400px;
 
   /* Z-index Scale */
   --z-dropdown: 100;
@@ -157,6 +158,7 @@
   --color-info-bg: rgba(116, 185, 255, 0.12);
 
   --color-bg: #0F1117;
+  --color-bg-secondary: #1A1D27;
   --color-bg-elevated: #1A1D27;
   --color-bg-surface: #1A1D27;
   --color-bg-base: #161923;
@@ -220,6 +222,7 @@ button {
   font-family: inherit;
   border: none;
   background: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 input,
@@ -227,6 +230,79 @@ textarea,
 select {
   font-family: inherit;
   font-size: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== TOUCH-FIRST ENHANCEMENTS ===== */
+
+/* Safe area for notched devices (iPhone X+, etc.) */
+html {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Prevent iOS text size auto-adjust */
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (max-width: 1024px) {
+
+  /* En tablets/móviles garantizamos hit targets mayores donde sea crítico */
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger form inputs on touch devices */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
+    min-height: 48px;
+    font-size: 16px;
+    /* Prevents iOS zoom on input focus */
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* Extra spacing between interactive items to prevent mis-taps */
+  nav ul {
+    gap: 4px;
+  }
+}
+
+/* Active state feedback for all touchable elements */
+button:active,
+a:active,
+[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease;
+}
+
+/* Smooth momentum scrolling on iOS */
+.scrollable,
+[style*="overflow"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent pull-to-refresh on main container (but allow on scrollable child elements) */
+body {
+  overscroll-behavior-y: contain;
 }
 
 /* Remove animations for users who prefer reduced motion */

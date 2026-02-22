@@ -3,7 +3,10 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import { useLocale } from '@/providers/LocaleProvider';
+import { fetchWithAuth, useAuth } from '@/providers/AuthProvider';
 import styles from './page.module.css';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ---- Types ----
 interface StaffMember {
@@ -21,6 +24,8 @@ interface Service {
     duration: number; // minutes
     price: number;
     isActive: boolean;
+    isGroup: boolean;
+    maxCapacity: number;
     isPopular: boolean;
     staff: StaffMember[];
     bookings: number;
@@ -32,13 +37,7 @@ interface Category {
     isCustom?: boolean;
 }
 
-// ---- Mock Data ----
-const STAFF: StaffMember[] = [
-    { id: 's1', name: 'Carlos', initials: 'CA', color: 'hsl(210, 60%, 55%)' },
-    { id: 's2', name: 'Ana', initials: 'AN', color: 'hsl(340, 60%, 55%)' },
-    { id: 's3', name: 'Miguel', initials: 'MI', color: 'hsl(160, 50%, 45%)' },
-    { id: 's4', name: 'Laura', initials: 'LA', color: 'hsl(40, 60%, 50%)' },
-];
+// Removed hardcoded STAFF
 
 const DEFAULT_CATEGORIES: Category[] = [
     { key: 'hair', icon: '✂️' },
@@ -46,69 +45,6 @@ const DEFAULT_CATEGORIES: Category[] = [
     { key: 'color', icon: '🎨' },
     { key: 'treatment', icon: '💆' },
     { key: 'extras', icon: '🧴' },
-];
-
-const INITIAL_SERVICES: Service[] = [
-    {
-        id: '1', name: 'Corte Clásico', description: 'Corte tradicional con tijera y navaja. Incluye lavado y secado.',
-        category: 'hair', duration: 30, price: 250, isActive: true, isPopular: true,
-        staff: [STAFF[0], STAFF[2]], bookings: 184,
-    },
-    {
-        id: '2', name: 'Corte Fade', description: 'Degradado con máquina, blend perfecto. Estilo moderno y definido.',
-        category: 'hair', duration: 45, price: 300, isActive: true, isPopular: true,
-        staff: [STAFF[0], STAFF[2], STAFF[3]], bookings: 156,
-    },
-    {
-        id: '3', name: 'Corte + Barba', description: 'Combo completo de corte y perfilado de barba con toalla caliente.',
-        category: 'hair', duration: 60, price: 350, isActive: true, isPopular: false,
-        staff: [STAFF[0], STAFF[2]], bookings: 132,
-    },
-    {
-        id: '4', name: 'Corte Infantil', description: 'Corte para niños menores de 12 años. Paciencia y buen trato garantizado.',
-        category: 'hair', duration: 25, price: 180, isActive: true, isPopular: false,
-        staff: [STAFF[2], STAFF[3]], bookings: 67,
-    },
-    {
-        id: '5', name: 'Perfilado de Barba', description: 'Delineado y perfilado con navaja. Toalla caliente incluida.',
-        category: 'beard', duration: 20, price: 150, isActive: true, isPopular: false,
-        staff: [STAFF[0]], bookings: 98,
-    },
-    {
-        id: '6', name: 'Barba Completa', description: 'Rasurado, perfilado y tratamiento con aceites esenciales.',
-        category: 'beard', duration: 35, price: 220, isActive: true, isPopular: true,
-        staff: [STAFF[0], STAFF[2]], bookings: 112,
-    },
-    {
-        id: '7', name: 'Coloración Completa', description: 'Aplicación de color profesional. Incluye diagnóstico capilar.',
-        category: 'color', duration: 90, price: 780, isActive: true, isPopular: false,
-        staff: [STAFF[1]], bookings: 45,
-    },
-    {
-        id: '8', name: 'Mechas / Highlights', description: 'Técnica de mechas con papel o gorra. Resultado natural.',
-        category: 'color', duration: 120, price: 950, isActive: true, isPopular: false,
-        staff: [STAFF[1]], bookings: 38,
-    },
-    {
-        id: '9', name: 'Tratamiento Capilar', description: 'Hidratación profunda con keratina. Restaura y fortalece.',
-        category: 'treatment', duration: 45, price: 520, isActive: true, isPopular: false,
-        staff: [STAFF[1], STAFF[3]], bookings: 73,
-    },
-    {
-        id: '10', name: 'Tratamiento Anticaída', description: 'Sesión con masaje y productos especializados contra la pérdida de cabello.',
-        category: 'treatment', duration: 40, price: 450, isActive: true, isPopular: false,
-        staff: [STAFF[1]], bookings: 29,
-    },
-    {
-        id: '11', name: 'Cejas', description: 'Diseño y perfilado de cejas con cera o pinza.',
-        category: 'extras', duration: 15, price: 100, isActive: true, isPopular: false,
-        staff: [STAFF[1], STAFF[3]], bookings: 85,
-    },
-    {
-        id: '12', name: 'Black Mask', description: 'Mascarilla facial de carbón activado. Limpieza profunda de poros.',
-        category: 'extras', duration: 20, price: 180, isActive: false, isPopular: false,
-        staff: [STAFF[1]], bookings: 18,
-    },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -150,6 +86,8 @@ interface ServiceForm {
     duration: number;
     price: number;
     isActive: boolean;
+    isGroup: boolean;
+    maxCapacity: number;
     staffIds: string[];
 }
 
@@ -160,12 +98,17 @@ const EMPTY_FORM: ServiceForm = {
     duration: 30,
     price: 0,
     isActive: true,
+    isGroup: false,
+    maxCapacity: 2,
     staffIds: [],
 };
 
 export default function ServicesPage() {
-    const { t, locale } = useLocale();
-    const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+    const { t } = useLocale();
+    const { activeBusinessId } = useAuth();
+    const [services, setServices] = useState<Service[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [staffList, setStaffList] = useState<StaffMember[]>([]);
     const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
     const [search, setSearch] = useState('');
     const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -186,6 +129,50 @@ export default function ServicesPage() {
         setToast({ message, visible: true });
         setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2000);
     };
+
+    useEffect(() => {
+        if (!activeBusinessId) { setIsLoading(false); return; }
+        setIsLoading(true);
+
+        Promise.all([
+            fetchWithAuth(`${API_URL}/api/v1/services/business/${activeBusinessId}`),
+            fetchWithAuth(`${API_URL}/api/v1/business-members/business/${activeBusinessId}`)
+        ]).then(async ([resSvc, resStaff]) => {
+            const dataSvc = resSvc.ok ? await resSvc.json() : [];
+            const dataStaff = resStaff.ok ? await resStaff.json() : [];
+
+            const mappedStaff: StaffMember[] = dataStaff.map((m: any) => ({
+                id: m.id,
+                name: m.user?.firstName ? `${m.user.firstName} ${m.user.lastName || ''}`.trim() : 'Usuario',
+                initials: m.user?.firstName ? m.user.firstName.substring(0, 2).toUpperCase() : 'US',
+                color: m.color || `hsl(${Math.random() * 360}, 60%, 50%)`
+            }));
+
+            setStaffList(mappedStaff);
+
+            const mapped: Service[] = dataSvc.map((s: any) => ({
+                id: s.id,
+                name: s.name,
+                description: s.description || '',
+                category: s.category || 'hair',
+                duration: s.durationMinutes || 30,
+                price: Number(s.price),
+                isActive: s.isActive,
+                isGroup: s.isGroup || false,
+                maxCapacity: s.maxCapacity || 2,
+                isPopular: false,
+                // Assign staff randomly or from relation if relation exists
+                staff: mappedStaff.length > 0 ? (s.staff || []).map((st: any) => mappedStaff.find(m => m.id === st.id)).filter(Boolean) : [],
+                bookings: 0
+            }));
+
+            setServices(mapped);
+            setIsLoading(false);
+        }).catch((err) => {
+            console.error('Failed to load catalog data', err);
+            setIsLoading(false);
+        });
+    }, [activeBusinessId]);
 
     // Close category popover on outside click
     useEffect(() => {
@@ -279,48 +266,86 @@ export default function ServicesPage() {
             duration: service.duration,
             price: service.price,
             isActive: service.isActive,
+            isGroup: service.isGroup || false,
+            maxCapacity: service.maxCapacity || 2,
             staffIds: service.staff.map(s => s.id),
         });
         setShowModal(true);
     };
 
-    const handleSave = () => {
-        if (editingService) {
-            setServices(prev => prev.map(s =>
-                s.id === editingService.id
-                    ? {
-                        ...s,
-                        name: form.name,
-                        description: form.description,
-                        category: form.category,
-                        duration: form.duration,
-                        price: form.price,
-                        isActive: form.isActive,
-                        staff: STAFF.filter(st => form.staffIds.includes(st.id)),
-                    }
-                    : s
-            ));
-        } else {
-            const newService: Service = {
-                id: Date.now().toString(),
+    const handleSave = async () => {
+        try {
+            const payload = {
+                businessId: activeBusinessId,
                 name: form.name,
                 description: form.description,
-                category: form.category,
-                duration: form.duration,
+                durationMinutes: form.duration,
                 price: form.price,
                 isActive: form.isActive,
-                isPopular: false,
-                staff: STAFF.filter(st => form.staffIds.includes(st.id)),
-                bookings: 0,
+                isGroup: form.isGroup,
+                maxCapacity: form.isGroup ? form.maxCapacity : null,
+                currency: 'MXN'
             };
-            setServices(prev => [...prev, newService]);
+
+            if (editingService) {
+                const res = await fetchWithAuth(`${API_URL}/api/v1/services/${editingService.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    setServices(prev => prev.map(s =>
+                        s.id === editingService.id ? {
+                            ...s,
+                            name: updated.name,
+                            description: updated.description,
+                            duration: updated.durationMinutes,
+                            price: Number(updated.price),
+                            isActive: updated.isActive,
+                            isGroup: updated.isGroup || false,
+                            maxCapacity: updated.maxCapacity || 2,
+                            staff: staffList.filter(st => form.staffIds.includes(st.id))
+                        } : s
+                    ));
+                    showToast('Servicio actualizado con éxito');
+                }
+            } else {
+                const res = await fetchWithAuth(`${API_URL}/api/v1/services`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const created = await res.json();
+                    setServices(prev => [...prev, {
+                        id: created.id,
+                        name: created.name,
+                        description: created.description || '',
+                        category: created.category || 'hair',
+                        duration: created.durationMinutes,
+                        price: Number(created.price),
+                        isActive: created.isActive,
+                        isGroup: created.isGroup || false,
+                        maxCapacity: created.maxCapacity || 2,
+                        isPopular: false,
+                        staff: staffList.filter(st => form.staffIds.includes(st.id)),
+                        bookings: 0
+                    }]);
+                    showToast('Servicio creado en base de datos');
+                }
+            }
+        } catch (e) {
+            console.error('Save failed', e);
+            showToast('Error al procesar el servicio');
+        } finally {
+            setShowModal(false);
+            setEditingService(null);
+            setForm(EMPTY_FORM);
         }
-        setShowModal(false);
-        setEditingService(null);
-        setForm(EMPTY_FORM);
     };
 
-    const updateField = (field: keyof ServiceForm, value: any) => {
+    const updateField = <K extends keyof ServiceForm>(field: K, value: ServiceForm[K]) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
@@ -339,263 +364,269 @@ export default function ServicesPage() {
                 title={t('services')}
                 subtitle={`${stats.total} ${t('service_count')}`}
                 actions={
-                    <button className="btn btn-primary" onClick={openCreate}>
-                        + {t('add_service')}
-                    </button>
+                    <button className="btn btn-primary" onClick={openCreate}>+</button>
                 }
             />
 
             <div className={styles.content}>
-                {/* Stats Row */}
-                <div className={styles.statsRow}>
-                    <div className={`card ${styles.statCard}`}>
-                        <div className={`${styles.statIconBg} ${styles.purple}`}>💼</div>
-                        <div className={styles.statInfo}>
-                            <div className={styles.statValue}>{stats.total}</div>
-                            <div className={styles.statLabel}>{t('services')}</div>
-                        </div>
+                {isLoading ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        Cargando catálogo de Servicios...
                     </div>
-                    <div className={`card ${styles.statCard}`}>
-                        <div className={`${styles.statIconBg} ${styles.green}`}>✓</div>
-                        <div className={styles.statInfo}>
-                            <div className={styles.statValue}>{stats.active}</div>
-                            <div className={styles.statLabel}>{t('active_services')}</div>
-                        </div>
-                    </div>
-                    <div className={`card ${styles.statCard}`}>
-                        <div className={`${styles.statIconBg} ${styles.blue}`}>💰</div>
-                        <div className={styles.statInfo}>
-                            <div className={styles.statValue}>{formatCurrency(stats.avgPrice)}</div>
-                            <div className={styles.statLabel}>{t('avg_price')}</div>
-                        </div>
-                    </div>
-                    <div className={`card ${styles.statCard}`}>
-                        <div className={`${styles.statIconBg} ${styles.amber}`}>🏆</div>
-                        <div className={styles.statInfo}>
-                            <div className={styles.statValue}>{stats.topService?.name}</div>
-                            <div className={styles.statLabel}>{t('most_booked')}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Search */}
-                <div className={styles.toolbar}>
-                    <div className={styles.searchBox}>
-                        <span className={styles.searchIcon}>🔍</span>
-                        <input
-                            className={styles.searchInput}
-                            placeholder={t('search_services')}
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-                {/* Category Tabs + Manage Button */}
-                <div className={styles.categoryRow}>
-                    <div className={styles.categoryTabs}>
-                        <button
-                            className={`${styles.categoryTab} ${activeCategory === 'all' ? styles.categoryTabActive : ''}`}
-                            onClick={() => setActiveCategory('all')}
-                        >
-                            <span className={styles.categoryIcon}>✨</span>
-                            {t('all_categories')}
-                        </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat.key}
-                                className={`${styles.categoryTab} ${activeCategory === cat.key ? styles.categoryTabActive : ''}`}
-                                onClick={() => setActiveCategory(cat.key)}
-                            >
-                                <span className={styles.categoryIcon}>{cat.icon}</span>
-                                {categoryLabel(cat.key)}
-                                <span className={styles.categoryCount}>
-                                    {services.filter(s => s.category === cat.key).length}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Category manage button */}
-                    <div className={styles.categoryManageWrapper} ref={catPopoverRef}>
-                        <button
-                            className={styles.categoryManageBtn}
-                            onClick={() => setShowCategoryPopover(prev => !prev)}
-                            title={t('manage_categories')}
-                        >
-                            ⚙️
-                        </button>
-
-                        {showCategoryPopover && (
-                            <div className={styles.categoryPopover}>
-                                <div className={styles.popoverHeader}>
-                                    <h4>{t('manage_categories')}</h4>
+                ) : (
+                    <>
+                        {/* Stats Row */}
+                        <div className={styles.statsRow}>
+                            <div className={`card ${styles.statCard}`}>
+                                <div className={`${styles.statIconBg} ${styles.purple}`}>💼</div>
+                                <div className={styles.statInfo}>
+                                    <div className={styles.statValue}>{stats.total}</div>
+                                    <div className={styles.statLabel}>{t('services')}</div>
                                 </div>
-                                <div className={styles.popoverBody}>
-                                    {/* Existing categories list */}
-                                    <div className={styles.catList}>
-                                        {categories.map(cat => (
-                                            <div key={cat.key} className={styles.catListItem}>
-                                                <span className={styles.catListIcon}>{cat.icon}</span>
-                                                <span className={styles.catListName}>{categoryLabel(cat.key)}</span>
-                                                <span className={styles.catListCount}>
-                                                    {services.filter(s => s.category === cat.key).length}
-                                                </span>
-                                                {cat.isCustom && (
-                                                    <button
-                                                        className={styles.catDeleteBtn}
-                                                        onClick={() => deleteCategory(cat.key)}
-                                                        title={t('delete_category')}
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                            </div>
+                            <div className={`card ${styles.statCard}`}>
+                                <div className={`${styles.statIconBg} ${styles.green}`}>✓</div>
+                                <div className={styles.statInfo}>
+                                    <div className={styles.statValue}>{stats.active}</div>
+                                    <div className={styles.statLabel}>{t('active_services')}</div>
+                                </div>
+                            </div>
+                            <div className={`card ${styles.statCard}`}>
+                                <div className={`${styles.statIconBg} ${styles.blue}`}>💰</div>
+                                <div className={styles.statInfo}>
+                                    <div className={styles.statValue}>{formatCurrency(stats.avgPrice)}</div>
+                                    <div className={styles.statLabel}>{t('avg_price')}</div>
+                                </div>
+                            </div>
+                            <div className={`card ${styles.statCard}`}>
+                                <div className={`${styles.statIconBg} ${styles.amber}`}>🏆</div>
+                                <div className={styles.statInfo}>
+                                    <div className={styles.statValue}>{stats.topService?.name}</div>
+                                    <div className={styles.statLabel}>{t('most_booked')}</div>
+                                </div>
+                            </div>
+                        </div>
 
-                                    {/* Add new category form */}
-                                    <div className={styles.catAddForm}>
-                                        <div className={styles.catAddRow}>
-                                            <div className={styles.emojiPicker}>
-                                                <button className={styles.emojiSelected}>{newCatIcon}</button>
-                                                <div className={styles.emojiGrid}>
-                                                    {EMOJI_OPTIONS.map(emoji => (
-                                                        <button
-                                                            key={emoji}
-                                                            className={styles.emojiOption}
-                                                            onClick={() => setNewCatIcon(emoji)}
-                                                        >
-                                                            {emoji}
-                                                        </button>
-                                                    ))}
+                        {/* Search */}
+                        <div className={styles.toolbar}>
+                            <div className={styles.searchBox}>
+                                <span className={styles.searchIcon}>🔍</span>
+                                <input
+                                    className={styles.searchInput}
+                                    placeholder={t('search_services')}
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Category Tabs + Manage Button */}
+                        <div className={styles.categoryRow}>
+                            <div className={styles.categoryTabs}>
+                                <button
+                                    className={`${styles.categoryTab} ${activeCategory === 'all' ? styles.categoryTabActive : ''}`}
+                                    onClick={() => setActiveCategory('all')}
+                                >
+                                    <span className={styles.categoryIcon}>✨</span>
+                                    {t('all_categories')}
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.key}
+                                        className={`${styles.categoryTab} ${activeCategory === cat.key ? styles.categoryTabActive : ''}`}
+                                        onClick={() => setActiveCategory(cat.key)}
+                                    >
+                                        <span className={styles.categoryIcon}>{cat.icon}</span>
+                                        {categoryLabel(cat.key)}
+                                        <span className={styles.categoryCount}>
+                                            {services.filter(s => s.category === cat.key).length}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Category manage button */}
+                            <div className={styles.categoryManageWrapper} ref={catPopoverRef}>
+                                <button
+                                    className={styles.categoryManageBtn}
+                                    onClick={() => setShowCategoryPopover(prev => !prev)}
+                                    title={t('manage_categories')}
+                                >
+                                    ⚙️
+                                </button>
+
+                                {showCategoryPopover && (
+                                    <div className={styles.categoryPopover}>
+                                        <div className={styles.popoverHeader}>
+                                            <h4>{t('manage_categories')}</h4>
+                                        </div>
+                                        <div className={styles.popoverBody}>
+                                            {/* Existing categories list */}
+                                            <div className={styles.catList}>
+                                                {categories.map(cat => (
+                                                    <div key={cat.key} className={styles.catListItem}>
+                                                        <span className={styles.catListIcon}>{cat.icon}</span>
+                                                        <span className={styles.catListName}>{categoryLabel(cat.key)}</span>
+                                                        <span className={styles.catListCount}>
+                                                            {services.filter(s => s.category === cat.key).length}
+                                                        </span>
+                                                        {cat.isCustom && (
+                                                            <button
+                                                                className={styles.catDeleteBtn}
+                                                                onClick={() => deleteCategory(cat.key)}
+                                                                title={t('delete_category')}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Add new category form */}
+                                            <div className={styles.catAddForm}>
+                                                <div className={styles.catAddRow}>
+                                                    <div className={styles.emojiPicker}>
+                                                        <button className={styles.emojiSelected}>{newCatIcon}</button>
+                                                        <div className={styles.emojiGrid}>
+                                                            {EMOJI_OPTIONS.map(emoji => (
+                                                                <button
+                                                                    key={emoji}
+                                                                    className={styles.emojiOption}
+                                                                    onClick={() => setNewCatIcon(emoji)}
+                                                                >
+                                                                    {emoji}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <input
+                                                        className={styles.catNameInput}
+                                                        placeholder={t('category_name')}
+                                                        value={newCatName}
+                                                        onChange={e => setNewCatName(e.target.value)}
+                                                        onKeyDown={e => e.key === 'Enter' && addCategory()}
+                                                    />
+                                                    <button
+                                                        className={styles.catAddBtn}
+                                                        onClick={addCategory}
+                                                        disabled={!newCatName.trim()}
+                                                    >
+                                                        +
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <input
-                                                className={styles.catNameInput}
-                                                placeholder={t('category_name')}
-                                                value={newCatName}
-                                                onChange={e => setNewCatName(e.target.value)}
-                                                onKeyDown={e => e.key === 'Enter' && addCategory()}
-                                            />
-                                            <button
-                                                className={styles.catAddBtn}
-                                                onClick={addCategory}
-                                                disabled={!newCatName.trim()}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Service Cards Grid */}
+                        <div className={styles.serviceGrid}>
+                            {filtered.map(service => (
+                                <div
+                                    key={service.id}
+                                    className={`card ${styles.serviceCard} ${!service.isActive ? styles.serviceInactive : ''}`}
+                                >
+                                    {/* Color accent strip */}
+                                    <div
+                                        className={styles.cardAccent}
+                                        style={{ background: getCategoryColor(service.category) }}
+                                    />
+
+                                    <div className={styles.cardBody}>
+                                        {/* Header */}
+                                        <div className={styles.cardHeader}>
+                                            <div className={styles.cardTitleRow}>
+                                                <h3 className={styles.cardTitle}>{service.name}</h3>
+                                                {service.isPopular && (
+                                                    <span className={styles.popularBadge}>
+                                                        🔥 {t('popular')}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span
+                                                className={styles.categoryChip}
+                                                style={{
+                                                    color: getCategoryColor(service.category),
+                                                    background: `${getCategoryColor(service.category)}18`,
+                                                }}
                                             >
-                                                +
-                                            </button>
+                                                {categoryLabel(service.category)}
+                                            </span>
+                                        </div>
+
+                                        {/* Description */}
+                                        <p className={styles.cardDesc}>{service.description}</p>
+
+                                        {/* Price + Duration row */}
+                                        <div className={styles.cardMetrics}>
+                                            <div className={styles.priceTag}>
+                                                {formatCurrency(service.price)}
+                                            </div>
+                                            <div className={styles.durationTag}>
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <polyline points="12 6 12 12 16 14" />
+                                                </svg>
+                                                {service.duration} {t('min_abbr')}
+                                            </div>
+                                        </div>
+
+                                        {/* Staff + Actions */}
+                                        <div className={styles.cardFooter}>
+                                            <div className={styles.staffRow}>
+                                                {service.staff.slice(0, 3).map(member => (
+                                                    <div
+                                                        key={member.id}
+                                                        className={styles.staffAvatar}
+                                                        style={{ background: member.color }}
+                                                        title={member.name}
+                                                    >
+                                                        {member.initials}
+                                                    </div>
+                                                ))}
+                                                {service.staff.length > 3 && (
+                                                    <div className={styles.staffMore}>
+                                                        +{service.staff.length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className={styles.cardActions}>
+                                                <label className={styles.toggleSwitch} title={t('toggle_active')}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={service.isActive}
+                                                        onChange={() => toggleServiceActive(service.id)}
+                                                    />
+                                                    <span className={styles.toggleSlider} />
+                                                </label>
+                                                <button
+                                                    className={styles.editBtn}
+                                                    onClick={() => openEdit(service)}
+                                                >
+                                                    ✏️
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Bookings mini stat */}
+                                        <div className={styles.bookingsBar}>
+                                            <span>{service.bookings} {t('bookings_count')}</span>
                                         </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+
+                        {filtered.length === 0 && (
+                            <div className={styles.emptyState}>
+                                <span className={styles.emptyIcon}>💼</span>
+                                <p>{t('no_services')}</p>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* Service Cards Grid */}
-                <div className={styles.serviceGrid}>
-                    {filtered.map(service => (
-                        <div
-                            key={service.id}
-                            className={`card ${styles.serviceCard} ${!service.isActive ? styles.serviceInactive : ''}`}
-                        >
-                            {/* Color accent strip */}
-                            <div
-                                className={styles.cardAccent}
-                                style={{ background: getCategoryColor(service.category) }}
-                            />
-
-                            <div className={styles.cardBody}>
-                                {/* Header */}
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.cardTitleRow}>
-                                        <h3 className={styles.cardTitle}>{service.name}</h3>
-                                        {service.isPopular && (
-                                            <span className={styles.popularBadge}>
-                                                🔥 {t('popular')}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span
-                                        className={styles.categoryChip}
-                                        style={{
-                                            color: getCategoryColor(service.category),
-                                            background: `${getCategoryColor(service.category)}18`,
-                                        }}
-                                    >
-                                        {categoryLabel(service.category)}
-                                    </span>
-                                </div>
-
-                                {/* Description */}
-                                <p className={styles.cardDesc}>{service.description}</p>
-
-                                {/* Price + Duration row */}
-                                <div className={styles.cardMetrics}>
-                                    <div className={styles.priceTag}>
-                                        {formatCurrency(service.price)}
-                                    </div>
-                                    <div className={styles.durationTag}>
-                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="10" />
-                                            <polyline points="12 6 12 12 16 14" />
-                                        </svg>
-                                        {service.duration} {t('min_abbr')}
-                                    </div>
-                                </div>
-
-                                {/* Staff + Actions */}
-                                <div className={styles.cardFooter}>
-                                    <div className={styles.staffRow}>
-                                        {service.staff.slice(0, 3).map(member => (
-                                            <div
-                                                key={member.id}
-                                                className={styles.staffAvatar}
-                                                style={{ background: member.color }}
-                                                title={member.name}
-                                            >
-                                                {member.initials}
-                                            </div>
-                                        ))}
-                                        {service.staff.length > 3 && (
-                                            <div className={styles.staffMore}>
-                                                +{service.staff.length - 3}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className={styles.cardActions}>
-                                        <label className={styles.toggleSwitch} title={t('toggle_active')}>
-                                            <input
-                                                type="checkbox"
-                                                checked={service.isActive}
-                                                onChange={() => toggleServiceActive(service.id)}
-                                            />
-                                            <span className={styles.toggleSlider} />
-                                        </label>
-                                        <button
-                                            className={styles.editBtn}
-                                            onClick={() => openEdit(service)}
-                                        >
-                                            ✏️
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Bookings mini stat */}
-                                <div className={styles.bookingsBar}>
-                                    <span>{service.bookings} {t('bookings_count')}</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {filtered.length === 0 && (
-                    <div className={styles.emptyState}>
-                        <span className={styles.emptyIcon}>💼</span>
-                        <p>{t('no_services')}</p>
-                    </div>
+                    </>
                 )}
             </div>
 
@@ -689,10 +720,41 @@ export default function ServicesPage() {
                                     </div>
                                 </div>
                             </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>¿Es Clase Grupal?</label>
+                                    <div className={styles.toggleRow}>
+                                        <label className={styles.toggleSwitch}>
+                                            <input
+                                                type="checkbox"
+                                                checked={form.isGroup}
+                                                onChange={e => updateField('isGroup', e.target.checked)}
+                                            />
+                                            <span className={styles.toggleSlider} />
+                                        </label>
+                                        <span className={styles.toggleLabel}>
+                                            {form.isGroup ? 'Sí, Requiere Cupos' : 'No, Cita Privada 1-a-1'}
+                                        </span>
+                                    </div>
+                                </div>
+                                {form.isGroup && (
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.formLabel}>Cupo Máximo</label>
+                                        <input
+                                            className={styles.formInput}
+                                            type="number"
+                                            min={2}
+                                            step={1}
+                                            value={form.maxCapacity}
+                                            onChange={e => updateField('maxCapacity', parseInt(e.target.value) || 2)}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>{t('assigned_staff')}</label>
                                 <div className={styles.staffChips}>
-                                    {STAFF.map(member => (
+                                    {staffList.map(member => (
                                         <button
                                             key={member.id}
                                             type="button"

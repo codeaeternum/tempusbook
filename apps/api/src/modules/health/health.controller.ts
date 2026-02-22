@@ -6,7 +6,7 @@ export class HealthController {
     check() {
         return {
             status: 'ok',
-            service: 'TempusBook API',
+            service: 'AeternaSuite API',
             timestamp: new Date().toISOString(),
         };
     }

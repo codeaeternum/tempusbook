@@ -17,23 +17,24 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>('light');
+    const [theme, setThemeState] = useState<Theme>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('aeternasuite-theme') as Theme | null;
+            if (stored) return stored;
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+        }
+        return 'light';
+    });
 
     useEffect(() => {
-        // Read from localStorage or system preference
-        const stored = localStorage.getItem('tempusbook-theme') as Theme | null;
-        if (stored) {
-            setThemeState(stored);
-            document.documentElement.setAttribute('data-theme', stored);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            setThemeState('dark');
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        // Initial setup for document attribute if it wasn't caught by SSR
+        document.documentElement.setAttribute('data-theme', theme);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('tempusbook-theme', theme);
+        localStorage.setItem('aeternasuite-theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {

@@ -34,6 +34,9 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 .logoIcon {
@@ -109,16 +112,48 @@
     flex-shrink: 0;
 }
 
-/* Toggle (desktop only) */
+/* Business Switcher */
+.businessSwitcher {
+    padding: var(--space-2) var(--space-5);
+    border-bottom: 1px solid var(--color-border-light);
+    flex-shrink: 0;
+}
+
+.businessSelect {
+    width: 100%;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-hover);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.businessSelect:hover,
+.businessSelect:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-bg);
+}
+
+.collapsed .businessSwitcher {
+    display: none;
+}
+
+/* Toggle — centered on right edge */
 .toggle {
     position: absolute;
-    top: 18px;
+    top: 50%;
     right: -14px;
+    transform: translateY(-50%);
     width: 28px;
-    height: 28px;
+    height: 44px;
     background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,14 +168,27 @@
     opacity: 1;
 }
 
+/* Always show toggle on touch devices */
+@media (hover: none) {
+    .toggle {
+        opacity: 0.7;
+    }
+}
+
 .toggle:hover {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: white;
+    opacity: 1;
+}
+
+.toggle:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .toggleIcon {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
     line-height: 1;
 }
 
@@ -173,8 +221,7 @@
     white-space: nowrap;
     cursor: pointer;
     border: none;
-    background: none;
-    width: 100%;
+    background: transparent;
 }
 
 .navItem:hover {
@@ -216,6 +263,13 @@
     flex-shrink: 0;
 }
 
+.navDivider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: var(--space-2) var(--space-3);
+    list-style: none;
+}
+
 /* Bottom */
 .bottom {
     padding: var(--space-3);
@@ -224,6 +278,45 @@
     flex-direction: column;
     gap: var(--space-1);
     flex-shrink: 0;
+}
+
+/* Quick Controls — language + theme at bottom */
+.quickControls {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.quickBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 1.15rem;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    justify-content: center;
+    min-height: 44px;
+}
+
+.quickBtn:hover {
+    background: var(--color-bg-active);
+    color: var(--color-text);
+}
+
+.quickBtn:active {
+    transform: scale(0.95);
+}
+
+.quickLabel {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.03em;
 }
 
 /* Hamburger button (mobile only) */
@@ -264,9 +357,73 @@
     backdrop-filter: blur(2px);
 }
 
+/* Mobile Bottom Navigation */
+.mobileBottomNav {
+    display: none;
+}
+
+.bottomNavItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    min-height: 56px;
+    padding: var(--space-1);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.bottomNavItem:active {
+    transform: scale(0.95);
+}
+
+.bottomNavIcon {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+}
+
+.bottomNavLabel {
+    font-size: 10px;
+    font-weight: var(--font-weight-medium);
+}
+
+.activeBottom {
+    color: var(--color-primary);
+}
+
+.activeBottom .bottomNavLabel {
+    font-weight: var(--font-weight-bold);
+}
+
+.hamburgerIconMini {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.hamburgerLineMini {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+}
+
 /* ===== RESPONSIVE ===== */
 
-/* Tablet and below: 768px */
+/* Mobile Only: 768px and below */
 @media (max-width: 768px) {
     .hamburger {
         display: flex;
@@ -280,6 +437,20 @@
         display: none;
     }
 
+    .mobileBottomNav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        min-height: calc(64px + env(safe-area-inset-bottom));
+        background: var(--color-bg-elevated);
+        border-top: 1px solid var(--color-border-light);
+        z-index: var(--z-fixed);
+        padding-bottom: env(safe-area-inset-bottom);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
     .closeBtn {
         display: flex;
     }
@@ -288,6 +459,7 @@
         transform: translateX(-100%);
         box-shadow: var(--shadow-xl);
         width: 280px;
+        height: calc(100vh - 64px - env(safe-area-inset-bottom));
         transition: transform var(--transition-base);
     }
 
@@ -302,5 +474,23 @@
     .planChip {
         margin-left: 0;
         margin-top: var(--space-3);
+    }
+
+    .quickControls {
+        flex-direction: row;
+        gap: var(--space-2);
+        padding: 0 var(--space-2);
+    }
+
+    .quickBtn {
+        justify-content: center;
+        padding: var(--space-3);
+        min-height: 48px;
+        font-size: 1.2rem;
+        border-radius: var(--radius-lg);
+    }
+
+    .quickLabel {
+        font-size: var(--font-size-base);
     }
 }

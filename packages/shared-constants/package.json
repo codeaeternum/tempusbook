@@ -1,5 +1,5 @@
 {
-    "name": "@tempusbook/shared-constants",
+    "name": "@aeternasuite/shared-constants",
     "version": "0.1.0",
     "private": true,
     "main": "./src/index.ts",
@@ -9,7 +9,7 @@
         "lint": "echo 'no linter configured yet'"
     },
     "dependencies": {
-        "@tempusbook/shared-types": "*"
+        "@aeternasuite/shared-types": "*"
     },
     "devDependencies": {
         "typescript": "^5.7.0"

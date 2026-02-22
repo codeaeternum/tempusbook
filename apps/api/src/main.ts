@@ -29,8 +29,8 @@ async function bootstrap() {
 
     // Swagger API Documentation
     const config = new DocumentBuilder()
-        .setTitle('TempusBook API')
-        .setDescription('Multi-category SaaS appointment booking platform API')
+        .setTitle('AeternaSuite API')
+        .setDescription('All-In-One SaaS platform for 28 industries — Bookings, CRM, ERP, Payments, and more')
         .setVersion('1.0')
         .addBearerAuth()
         .build();
@@ -41,7 +41,7 @@ async function bootstrap() {
     const port = process.env.PORT || 3001;
     await app.listen(port);
 
-    console.log(`🚀 TempusBook API running on http://localhost:${port}`);
+    console.log(`🚀 AeternaSuite API running on http://localhost:${port}`);
     console.log(`📚 Swagger docs at http://localhost:${port}/docs`);
 }
 

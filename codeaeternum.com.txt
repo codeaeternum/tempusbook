@@ -1,0 +1,57 @@
+;;
+;; Domain:     codeaeternum.com.
+;; Exported:   2026-02-21 19:38:25
+;;
+;; This file is intended for use for informational and archival
+;; purposes ONLY and MUST be edited before use on a production
+;; DNS server.  In particular, you must:
+;;   -- update the SOA record with the correct authoritative name server
+;;   -- update the SOA record with the contact e-mail address information
+;;   -- update the NS record(s) with the authoritative name servers for this domain.
+;;
+;; For further information, please consult the BIND documentation
+;; located on the following website:
+;;
+;; http://www.isc.org/
+;;
+;; And RFC 1035:
+;;
+;; http://www.ietf.org/rfc/rfc1035.txt
+;;
+;; Please note that we do NOT offer technical support for any use
+;; of this zone data, the BIND name server, or any other third-party
+;; DNS software.
+;;
+;; Use at your own risk.
+;; SOA Record
+codeaeternum.com	3600	IN	SOA	chuck.ns.cloudflare.com. dns.cloudflare.com. 2052336930 10000 2400 604800 3600
+
+;; NS Records
+codeaeternum.com.	86400	IN	NS	chuck.ns.cloudflare.com.
+codeaeternum.com.	86400	IN	NS	nina.ns.cloudflare.com.
+
+;; A Records
+codeaeternum.com.	1	IN	A	185.199.108.153 ; cf_tags=cf-proxied:true
+codeaeternum.com.	1	IN	A	185.199.109.153 ; cf_tags=cf-proxied:true
+codeaeternum.com.	1	IN	A	185.199.110.153 ; cf_tags=cf-proxied:true
+codeaeternum.com.	1	IN	A	185.199.111.153 ; cf_tags=cf-proxied:true
+
+;; CNAME Records
+fm1._domainkey.codeaeternum.com.	1	IN	CNAME	fm1.codeaeternum.com.dkim.fmhosted.com. ; cf_tags=cf-proxied:false
+fm2._domainkey.codeaeternum.com.	1	IN	CNAME	fm2.codeaeternum.com.dkim.fmhosted.com. ; cf_tags=cf-proxied:false
+fm3._domainkey.codeaeternum.com.	1	IN	CNAME	fm3.codeaeternum.com.dkim.fmhosted.com. ; cf_tags=cf-proxied:false
+www.codeaeternum.com.	1	IN	CNAME	galindoasc.github.io. ; cf_tags=cf-proxied:true
+
+;; MX Records
+codeaeternum.com.	1	IN	MX	20 in2-smtp.messagingengine.com.
+codeaeternum.com.	1	IN	MX	10 in1-smtp.messagingengine.com.
+codeaeternum.com.	3600	IN	MX	5 alt2.aspmx.l.google.com.
+codeaeternum.com.	3600	IN	MX	10 alt4.aspmx.l.google.com.
+codeaeternum.com.	3600	IN	MX	5 alt1.aspmx.l.google.com.
+codeaeternum.com.	3600	IN	MX	10 alt3.aspmx.l.google.com.
+codeaeternum.com.	3600	IN	MX	1 aspmx.l.google.com.
+
+;; TXT Records
+codeaeternum.com.	1	IN	TXT	"v=spf1 include:spf.messagingengine.com ?all"
+codeaeternum.com.	3600	IN	TXT	"v=spf1 include:_spf.google.com ~all"
+codeaeternum.com.	3600	IN	TXT	"google-site-verification=7GbV6c2wcNIF3Bk5v3vKWfJGkuFT1XgojZK3vIL9HGE"

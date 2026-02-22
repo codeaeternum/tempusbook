@@ -1,0 +1,211 @@
+.content {
+    padding: var(--space-4);
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+    /* Space for sticky footer */
+}
+
+.introText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+    line-height: 1.5;
+}
+
+.formSection {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-5);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+    background: var(--color-bg-hover);
+    padding: var(--space-3) var(--space-4);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkItems {
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.checkRow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkLabel {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.checkOptions {
+    display: flex;
+    gap: 8px;
+}
+
+.optionBtn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.optionBtnOk.active {
+    background: hsl(152 60% 90%);
+    color: hsl(152 60% 30%);
+    border-color: hsl(152 60% 60%);
+}
+
+.optionBtnWarn.active {
+    background: hsl(40 80% 90%);
+    color: hsl(40 80% 40%);
+    border-color: hsl(40 80% 60%);
+}
+
+.optionBtnFail.active {
+    background: hsl(0 70% 92%);
+    color: hsl(0 70% 50%);
+    border-color: hsl(0 70% 60%);
+}
+
+[data-theme="dark"] .optionBtnOk.active {
+    background: hsl(152 40% 20%);
+    color: hsl(152 60% 70%);
+}
+
+[data-theme="dark"] .optionBtnWarn.active {
+    background: hsl(40 40% 20%);
+    color: hsl(40 80% 70%);
+}
+
+[data-theme="dark"] .optionBtnFail.active {
+    background: hsl(0 40% 20%);
+    color: hsl(0 70% 70%);
+}
+
+.notesArea {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 12px;
+    font-size: var(--font-size-sm);
+    background: var(--color-bg-surface);
+    color: var(--color-text);
+    resize: vertical;
+    min-height: 60px;
+}
+
+.notesArea:focus {
+    outline: none;
+    border-bottom-color: var(--color-primary);
+}
+
+.stickyFooter {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-4);
+    background: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+}
+
+@media (min-width: 768px) {
+    .stickyFooter {
+        left: var(--sidebar-width);
+    }
+}
+
+.submitBtn {
+    width: 100%;
+    max-width: 400px;
+    padding: 14px;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.submitBtn:active {
+    transform: scale(0.98);
+}
+
+/* Modals / Toasts reused */
+.toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 9999;
+}
+
+.toastVisible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.formGroup {
+    margin-bottom: var(--space-5);
+    max-width: 400px;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.formInput {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+}

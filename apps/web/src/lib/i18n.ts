@@ -1,5 +1,5 @@
 // =============================================
-// TempusBook i18n — Spanish & English translations
+// AeternaSuite i18n — Spanish & English translations
 // =============================================
 
 export type Locale = 'es' | 'en';
@@ -7,7 +7,7 @@ export type Locale = 'es' | 'en';
 const translations = {
     es: {
         // General
-        app_name: 'TempusBook',
+        app_name: 'AeternaSuite',
         loading: 'Cargando...',
         save: 'Guardar',
         cancel: 'Cancelar',
@@ -112,6 +112,35 @@ const translations = {
         animations: 'Animaciones',
         timezone: 'Zona horaria',
         currency: 'Moneda',
+        business_profile: 'Perfil del negocio',
+        active_modules: 'Módulos activos',
+        manage_modules: 'Administra qué secciones aparecen en tu menú lateral',
+        billing_fiscal: 'Facturación y fiscal',
+        notification_settings: 'Notificaciones',
+        primary_color: 'Color primario',
+        requires_invoice: '¿Emite factura?',
+        rfc: 'RFC',
+        razon_social: 'Razón social',
+        regimen_fiscal: 'Régimen fiscal',
+        tax_rate: 'Tasa de IVA',
+        prices_include_tax: 'Precios incluyen impuestos',
+        manages_cash: 'Maneja flujo de efectivo',
+        client_fiscal_data: 'Datos fiscales del cliente',
+        client_fiscal_never: 'Nunca solicitar',
+        client_fiscal_optional: 'Opcional',
+        client_fiscal_required: 'Obligatorio',
+        notification_email: 'Notificaciones por email',
+        notification_push: 'Notificaciones push',
+        notification_whatsapp: 'Recordatorios por WhatsApp',
+        reminder_hours: 'Horas de anticipación para recordatorio',
+        plan_trial: 'Prueba gratuita',
+        plan_expires: 'Tu prueba expira en',
+        quotes: 'Cotizaciones',
+        cashflow: 'Flujo de efectivo',
+        pos: 'Punto de Venta',
+        settings_saved: 'Configuración guardada',
+        reset_defaults: 'Restaurar valores predeterminados',
+        select_rubro: 'Tipo de negocio',
 
         // Empty states
         no_appointments_today: 'No hay citas para hoy',
@@ -236,6 +265,8 @@ const translations = {
         total_value: 'Valor inventario',
         low_stock_items: 'Stock bajo',
         out_of_stock_items: 'Agotados',
+        product_added: 'Producto agregado',
+        product_updated: 'Producto actualizado',
         product_activated: 'Producto activado',
         product_deactivated: 'Producto desactivado',
         cat_hair_care: 'Cuidado Capilar',
@@ -265,11 +296,28 @@ const translations = {
         in_progress: 'En curso',
         completed: 'Completada',
         cancelled: 'Cancelada',
+
+        // Mechanic Vertical
+        vehicles: 'Vehículos',
+        work_orders: 'Órdenes',
+        inspections: 'Inspecciones',
+
+        // New Modules
+        packages: 'Paquetes',
+        gift_cards: 'Tarjetas de Regalo',
+        reception: 'Recepción',
+        devices: 'Dispositivos',
+
+        // Clinical Vertical
+        dental_chart: 'Odontograma',
+        body_chart: 'Mapa Corporal',
+        medical_records: 'Expediente Clínico',
+        prescriptions: 'Recetas',
     },
 
     en: {
         // General
-        app_name: 'TempusBook',
+        app_name: 'AeternaSuite',
         loading: 'Loading...',
         save: 'Save',
         cancel: 'Cancel',
@@ -374,6 +422,35 @@ const translations = {
         animations: 'Animations',
         timezone: 'Timezone',
         currency: 'Currency',
+        business_profile: 'Business Profile',
+        active_modules: 'Active Modules',
+        manage_modules: 'Manage which sections appear in your sidebar',
+        billing_fiscal: 'Billing & Fiscal',
+        notification_settings: 'Notifications',
+        primary_color: 'Primary Color',
+        requires_invoice: 'Issue invoices?',
+        rfc: 'Tax ID (RFC)',
+        razon_social: 'Legal Name',
+        regimen_fiscal: 'Tax Regime',
+        tax_rate: 'VAT Rate',
+        prices_include_tax: 'Prices include taxes',
+        manages_cash: 'Manages cash flow',
+        client_fiscal_data: 'Client fiscal data',
+        client_fiscal_never: 'Never request',
+        client_fiscal_optional: 'Optional',
+        client_fiscal_required: 'Required',
+        notification_email: 'Email notifications',
+        notification_push: 'Push notifications',
+        notification_whatsapp: 'WhatsApp reminders',
+        reminder_hours: 'Reminder hours in advance',
+        plan_trial: 'Free trial',
+        plan_expires: 'Your trial expires in',
+        quotes: 'Quotes',
+        cashflow: 'Cash Flow',
+        pos: 'Point of Sale',
+        settings_saved: 'Settings saved',
+        reset_defaults: 'Reset to defaults',
+        select_rubro: 'Business type',
 
         // Empty states
         no_appointments_today: 'No appointments for today',
@@ -498,6 +575,8 @@ const translations = {
         total_value: 'Inventory value',
         low_stock_items: 'Low stock',
         out_of_stock_items: 'Out of stock',
+        product_added: 'Product added',
+        product_updated: 'Product updated',
         product_activated: 'Product activated',
         product_deactivated: 'Product deactivated',
         cat_hair_care: 'Hair Care',
@@ -527,6 +606,23 @@ const translations = {
         in_progress: 'In Progress',
         completed: 'Completed',
         cancelled: 'Cancelled',
+
+        // Mechanic Vertical
+        vehicles: 'Vehicles',
+        work_orders: 'Work Orders',
+        inspections: 'Inspections',
+
+        // New Modules
+        packages: 'Packages',
+        gift_cards: 'Gift Cards',
+        reception: 'Reception',
+        devices: 'Devices',
+
+        // Clinical Vertical
+        dental_chart: 'Dental Chart',
+        body_chart: 'Body Chart',
+        medical_records: 'Medical Records',
+        prescriptions: 'Prescriptions',
     },
 } as const;
 

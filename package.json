@@ -1,11 +1,11 @@
 {
-  "name": "tempusbook",
+  "name": "aeternasuite",
   "version": "0.1.0",
   "private": true,
-  "description": "TempusBook — Multi-category SaaS appointment booking platform",
+  "description": "AeternaSuite — All-In-One SaaS platform for 28 industries",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codeaeternum/tempusbook.git"
+    "url": "https://github.com/codeaeternum/aeternasuite.git"
   },
   "workspaces": [
     "apps/*",

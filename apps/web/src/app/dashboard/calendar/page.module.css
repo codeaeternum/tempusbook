@@ -1,8 +1,9 @@
 /* ─── Calendar Page ─── */
 
 .content {
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-6);
     max-width: var(--max-content-width);
+    margin: 0 auto;
     height: calc(100vh - var(--header-height));
     display: flex;
     flex-direction: column;
@@ -27,8 +28,9 @@
 }
 
 .navBtn {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    /* Hit target fix */
+    height: 44px;
     border: 1px solid var(--color-border);
     background: var(--color-bg-surface);
     border-radius: var(--radius-md);
@@ -36,7 +38,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
+    /* Increased icon size */
     color: var(--color-text-secondary);
     transition: all var(--transition-fast);
 }
@@ -48,12 +51,16 @@
 }
 
 .todayBtn {
-    padding: 6px 14px;
+    padding: 0 16px;
+    min-height: 44px;
+    /* Hit target fix */
+    display: flex;
+    align-items: center;
     border: 1px solid var(--color-border);
     background: var(--color-bg-surface);
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text);
     transition: all var(--transition-fast);
@@ -82,13 +89,17 @@
 }
 
 .viewBtn {
-    padding: 6px 14px;
+    padding: 0 16px;
+    min-height: 44px;
+    /* Hit target fix */
     border: none;
     background: transparent;
     border-radius: var(--radius-sm);
     cursor: pointer;
+    display: flex;
+    align-items: center;
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-tertiary);
     transition: all var(--transition-fast);
     text-transform: capitalize;
@@ -100,12 +111,7 @@
     box-shadow: var(--shadow-sm);
 }
 
-.calendarBody {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin-top: var(--space-4);
-}
+
 
 /* ─── Day View ─── */
 
@@ -393,6 +399,165 @@
     padding-left: 4px;
 }
 
+.monthMore {
+    font-size: 10px;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+    padding-left: 4px;
+}
+
+/* ─── Waitlist Panel overlay ─── */
+
+.waitlistBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: var(--radius-full);
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+}
+
+.calendarLayout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.calendarBody {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
+}
+
+.waitlistPanel {
+    width: 320px;
+    background: var(--color-bg-surface);
+    border-left: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.waitlistTitle {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-1);
+}
+
+.waitlistSubtitle {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-4);
+    line-height: 1.4;
+}
+
+.waitlistItems {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    overflow-y: auto;
+}
+
+.emptyWaitlist {
+    text-align: center;
+    padding: var(--space-6) var(--space-4);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--color-border);
+}
+
+.waitlistCard {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.waitlistCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.wHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-1);
+}
+
+.wClient {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.wTime {
+    font-size: 10px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+}
+
+.wService {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-3);
+}
+
+.wPhone {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+}
+
+.wActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+.waBtn {
+    color: #25D366 !important;
+    border-color: rgba(37, 211, 102, 0.3) !important;
+    text-decoration: none;
+}
+
+.waBtn:hover {
+    background: rgba(37, 211, 102, 0.1) !important;
+}
+
 /* ─── Event Detail Overlay ─── */
 
 .eventOverlay {
@@ -457,8 +622,9 @@
 
 .detailClose {
     margin-left: auto;
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    /* Hit target fix */
+    height: 44px;
     border: none;
     background: var(--color-bg-hover);
     border-radius: var(--radius-md);
@@ -466,7 +632,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     color: var(--color-text-secondary);
     transition: all var(--transition-fast);
 }
@@ -572,7 +738,8 @@
     }
 
     .eventDetail {
-        bottom: 0;
+        bottom: 88px;
+        /* Avoid overlapping Bottom Bar */
         right: 0;
         left: 0;
         width: 100%;

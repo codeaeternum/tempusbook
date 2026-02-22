@@ -1,5 +1,5 @@
 // =============================================
-// TempusBook Shared Utilities
+// AeternaSuite Shared Utilities
 // =============================================
 
 /**

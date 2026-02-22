@@ -1,0 +1,291 @@
+.onboardingContainer {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--color-bg);
+    padding: var(--space-4);
+    position: relative;
+    overflow: hidden;
+}
+
+.onboardingCard {
+    width: 100%;
+    max-width: 600px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-8);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+.logoMark {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+    margin: 0 auto var(--space-5);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-bottom: var(--space-8);
+    font-size: var(--font-size-md);
+}
+
+.stepIndicator {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+}
+
+.stepDot {
+    width: 60px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.stepDotActive {
+    background: var(--color-primary);
+}
+
+.formGroup {
+    margin-bottom: var(--space-5);
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    min-height: 44px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    outline: none;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.categoryCard {
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.categoryCard:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+}
+
+.categoryCardActive {
+    border-color: var(--color-primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.categoryIcon {
+    font-size: 2rem;
+    margin-bottom: var(--space-2);
+}
+
+.categoryName {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+.btnGroup {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-8);
+}
+
+.btnNext {
+    background: var(--color-primary);
+    color: white;
+    padding: var(--space-3) var(--space-6);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btnNext:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+}
+
+.btnNext:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnPrev {
+    background: transparent;
+    color: var(--color-text-secondary);
+    padding: var(--space-3) var(--space-4);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: var(--font-size-base);
+    border: none;
+    cursor: pointer;
+}
+
+.btnPrev:hover {
+    color: var(--color-text);
+}
+
+/* New Steps Styles */
+.stepContent {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hint {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.2rem;
+}
+
+.hoursList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: var(--space-6);
+}
+
+.hourRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-bg);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    min-width: 120px;
+    min-height: 44px;
+}
+
+.timeInputs {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.timeInput {
+    padding: 0.4rem;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-family: monospace;
+    font-size: var(--font-size-base);
+}
+
+.closedBadge {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Background effects */
+.blob1,
+.blob2 {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: 1;
+    opacity: 0.5;
+}
+
+.blob1 {
+    width: 600px;
+    height: 600px;
+    background: var(--color-primary);
+    top: -200px;
+    right: -200px;
+}
+
+.blob2 {
+    width: 500px;
+    height: 500px;
+    background: var(--color-accent);
+    bottom: -150px;
+    left: -150px;
+}

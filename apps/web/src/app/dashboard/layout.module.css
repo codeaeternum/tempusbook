@@ -1,20 +1,28 @@
 .dashboardLayout {
-    display: flex;
+    display: block;
+    /* Removed flex since Sidebar is fixed */
     min-height: 100vh;
-    overflow-x: hidden;
+    background-color: var(--color-bg);
 }
 
 .main {
-    flex: 1;
     margin-left: var(--sidebar-width);
     min-height: 100vh;
-    min-width: 0;
-    overflow-x: hidden;
     transition: margin-left var(--transition-slow);
+    display: flex;
+    flex-direction: column;
 }
 
+.mainCollapsed {
+    margin-left: var(--sidebar-collapsed);
+}
+
+/* Mobile: <= 768px */
 @media (max-width: 768px) {
     .main {
         margin-left: 0;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom));
+        padding-top: 56px;
+        /* Space for hamburger */
     }
 }

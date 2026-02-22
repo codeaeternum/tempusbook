@@ -16,7 +16,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
     const setLocale = (newLocale: Locale) => {
         setLocaleState(newLocale);
-        localStorage.setItem('tempusbook-locale', newLocale);
+        localStorage.setItem('aeternasuite-locale', newLocale);
         document.documentElement.setAttribute('lang', newLocale);
     };
 

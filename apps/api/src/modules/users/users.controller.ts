@@ -5,28 +5,42 @@ import {
     Patch,
     Param,
     Body,
-    Req,
+    UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller('users')
+@UseGuards(FirebaseAuthGuard)
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
     @Get('me')
-    async getMe(@Req() req: any) {
-        const firebaseUid = req.user.uid;
-        return this.usersService.findByFirebaseUid(firebaseUid);
+    async getMe(@CurrentUser() user: any) {
+        return this.usersService.findByFirebaseUid(user.uid);
+    }
+
+    @Get('me/b2c-hub')
+    async getB2CHub(@CurrentUser() user: any) {
+        const dbUser = await this.usersService.findByFirebaseUid(user.uid);
+        return this.usersService.getB2CHubData(dbUser!.id);
+    }
+
+    @Get('me/b2c-hub/:businessId')
+    async getContextualB2CHub(@CurrentUser() user: any, @Param('businessId') businessId: string) {
+        const dbUser = await this.usersService.findByFirebaseUid(user.uid);
+        return this.usersService.getContextualB2CHubData(dbUser!.id, businessId);
     }
 
     @Post('sync')
-    async syncUser(@Req() req: any, @Body() body: any) {
+    async syncUser(@CurrentUser() user: any, @Body() body: any) {
         return this.usersService.createOrUpdate({
-            firebaseUid: req.user.uid,
-            email: req.user.email || body.email,
+            firebaseUid: user.uid,
+            email: user.email || body.email,
             phone: body.phone,
             firstName: body.firstName,
             lastName: body.lastName,
@@ -35,20 +49,20 @@ export class UsersController {
     }
 
     @Patch('me/preferences')
-    async updatePreferences(@Req() req: any, @Body() body: any) {
-        const user = await this.usersService.findByFirebaseUid(req.user.uid);
-        return this.usersService.updatePreferences(user!.id, body);
+    async updatePreferences(@CurrentUser() user: any, @Body() body: any) {
+        const dbUser = await this.usersService.findByFirebaseUid(user.uid);
+        return this.usersService.updatePreferences(dbUser!.id, body);
     }
 
     @Post('me/favorites/:businessId')
-    async toggleFavorite(@Req() req: any, @Param('businessId') businessId: string) {
-        const user = await this.usersService.findByFirebaseUid(req.user.uid);
-        return this.usersService.toggleFavorite(user!.id, businessId);
+    async toggleFavorite(@CurrentUser() user: any, @Param('businessId') businessId: string) {
+        const dbUser = await this.usersService.findByFirebaseUid(user.uid);
+        return this.usersService.toggleFavorite(dbUser!.id, businessId);
     }
 
     @Get('me/favorites')
-    async getFavorites(@Req() req: any) {
-        const user = await this.usersService.findByFirebaseUid(req.user.uid);
-        return this.usersService.getFavorites(user!.id);
+    async getFavorites(@CurrentUser() user: any) {
+        const dbUser = await this.usersService.findByFirebaseUid(user.uid);
+        return this.usersService.getFavorites(dbUser!.id);
     }
 }

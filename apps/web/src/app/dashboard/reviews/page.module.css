@@ -1,0 +1,376 @@
+/* =============================================
+   AeternaSuite — Reviews / Reseñas
+   ============================================= */
+
+.content {
+    padding: var(--space-8);
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+}
+
+/* Top Grid */
+.topGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+/* Rating Card */
+.ratingCard {
+    display: flex;
+    gap: var(--space-6);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+}
+
+.ratingBig {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.ratingNum {
+    display: block;
+    font-size: 3rem;
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.ratingStars {
+    color: #f59e0b;
+    font-size: 1.2rem;
+    margin: var(--space-1) 0;
+}
+
+.ratingCount {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.ratingDist {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+}
+
+.distRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.distLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    width: 24px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.distBar {
+    flex: 1;
+    height: 8px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.distFill {
+    height: 100%;
+    background: #f59e0b;
+    border-radius: var(--radius-full);
+    transition: width 0.4s ease;
+}
+
+.distCount {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    width: 16px;
+    text-align: right;
+}
+
+/* Quick Stats */
+.quickStats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+}
+
+.qStat {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.qIcon {
+    font-size: 1.3rem;
+}
+
+.qValue {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text);
+}
+
+.qLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+    flex-wrap: wrap;
+}
+
+.searchGroup {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-3);
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+}
+
+.searchIcon {
+    font-size: 0.85rem;
+    opacity: 0.5;
+}
+
+.searchInput {
+    border: none;
+    background: transparent;
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    outline: none;
+    width: 100%;
+}
+
+.filterGroup {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.filterBtn {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.filterBtn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.filterActive {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Reviews List */
+.reviewsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.reviewCard {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    transition: border-color 0.15s;
+}
+
+.reviewCard:hover {
+    border-color: var(--color-primary);
+}
+
+.reviewNegative {
+    border-left: 3px solid #ef4444;
+}
+
+.reviewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-3);
+}
+
+.reviewClient {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.clientAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}
+
+.clientName {
+    display: block;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.reviewMeta {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.reviewRating {
+    flex-shrink: 0;
+}
+
+.stars {
+    color: #f59e0b;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.reviewComment {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--space-3);
+}
+
+.reviewFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reviewService {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.replyBtn {
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.replyBtn:hover {
+    opacity: 0.9;
+}
+
+/* Reply Box */
+.replyBox {
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(var(--color-primary-rgb), 0.04);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+}
+
+.replyHeader {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.replyText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .topGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .content {
+        padding: var(--space-4);
+    }
+
+    .ratingCard {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .ratingBig {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .ratingNum {
+        font-size: 2rem;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchGroup {
+        max-width: none;
+    }
+
+    .filterGroup {
+        overflow-x: auto;
+        padding-bottom: var(--space-1);
+    }
+
+    .reviewHeader {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .quickStats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

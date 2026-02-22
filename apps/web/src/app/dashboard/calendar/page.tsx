@@ -1,25 +1,19 @@
 'use client';
+import type { TranslationKey } from '@/lib/i18n';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useLocale } from '@/providers/LocaleProvider';
+import { fetchWithAuth, useAuth } from '@/providers/AuthProvider';
 import styles from './page.module.css';
+import NewBookingModal from '@/components/bookings/NewBookingModal';
 
 // ─── Helpers ──────────────────────────────────────────────
 
 type ViewMode = 'day' | 'week' | 'month';
 
-interface CalendarEvent {
-    id: string;
-    title: string;
-    client: string;
-    service: string;
-    staff: string;
-    start: Date;
-    end: Date;
-    status: 'confirmed' | 'pending' | 'in_progress' | 'completed' | 'cancelled';
-    color: string;
-}
+import { useCalendarLayout, CalendarEvent, LayoutEvent } from '@/hooks/useCalendarLayout';
 
 const HOUR_HEIGHT = 80; // px per hour row — 30-min events = 40px, enough for text
 const START_HOUR = 7;
@@ -76,156 +70,125 @@ function formatTime(date: Date): string {
 }
 
 // ─── Collision detection for overlapping events ───
+// Moved to src/hooks/useCalendarLayout.ts to prevent React render-cycle thrashing.
 
-interface LayoutEvent extends CalendarEvent {
-    top: number;      // px from grid top
-    height: number;   // px height
-    left: number;     // % from left (0-100)
-    width: number;    // % width
-}
-
-function layoutEvents(events: CalendarEvent[]): LayoutEvent[] {
-    if (events.length === 0) return [];
-
-    const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime());
-
-    // Group into overlapping clusters
-    const clusters: CalendarEvent[][] = [];
-    let currentCluster: CalendarEvent[] = [];
-    let clusterEnd = 0;
-
-    for (const evt of sorted) {
-        const evtStartMin = evt.start.getHours() * 60 + evt.start.getMinutes();
-        if (currentCluster.length === 0 || evtStartMin < clusterEnd) {
-            currentCluster.push(evt);
-            const evtEndMin = evt.end.getHours() * 60 + evt.end.getMinutes();
-            clusterEnd = Math.max(clusterEnd, evtEndMin);
-        } else {
-            clusters.push(currentCluster);
-            currentCluster = [evt];
-            clusterEnd = evt.end.getHours() * 60 + evt.end.getMinutes();
-        }
-    }
-    if (currentCluster.length > 0) clusters.push(currentCluster);
-
-    // Layout each cluster
-    const result: LayoutEvent[] = [];
-
-    for (const cluster of clusters) {
-        // Assign columns — greedy algorithm
-        const columns: CalendarEvent[][] = [];
-
-        for (const evt of cluster) {
-            const evtStartMin = evt.start.getHours() * 60 + evt.start.getMinutes();
-            let placed = false;
-            for (const col of columns) {
-                const lastInCol = col[col.length - 1];
-                const lastEndMin = lastInCol.end.getHours() * 60 + lastInCol.end.getMinutes();
-                if (evtStartMin >= lastEndMin) {
-                    col.push(evt);
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) {
-                columns.push([evt]);
-            }
-        }
-
-        const numCols = columns.length;
-        for (let colIdx = 0; colIdx < numCols; colIdx++) {
-            for (const evt of columns[colIdx]) {
-                const startMin = evt.start.getHours() * 60 + evt.start.getMinutes();
-                const endMin = evt.end.getHours() * 60 + evt.end.getMinutes();
-                const durationMin = endMin - startMin;
-
-                result.push({
-                    ...evt,
-                    top: ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT,
-                    height: Math.max((durationMin / 60) * HOUR_HEIGHT, 44),
-                    left: (colIdx / numCols) * 100,
-                    width: (1 / numCols) * 100,
-                });
-            }
-        }
-    }
-
-    return result;
-}
-
-// ─── Mock data ────────────────────────────────────────────
-
-function generateMockEvents(referenceDate: Date): CalendarEvent[] {
-    const y = referenceDate.getFullYear();
-    const m = referenceDate.getMonth();
-    const d = referenceDate.getDate();
-
-    const events: CalendarEvent[] = [
-        {
-            id: '1', title: 'Corte + Barba', client: 'María García', service: 'Corte + Barba',
-            staff: 'Carlos', start: new Date(y, m, d, 9, 0), end: new Date(y, m, d, 9, 45),
-            status: 'confirmed', color: STAFF_COLORS[0],
-        },
-        {
-            id: '2', title: 'Corte Clásico', client: 'Juan Pérez', service: 'Corte Clásico',
-            staff: 'Carlos', start: new Date(y, m, d, 10, 0), end: new Date(y, m, d, 10, 30),
-            status: 'pending', color: STAFF_COLORS[0],
-        },
-        {
-            id: '3', title: 'Tratamiento Capilar', client: 'Ana López', service: 'Tratamiento',
-            staff: 'Sofía', start: new Date(y, m, d, 11, 30), end: new Date(y, m, d, 12, 30),
-            status: 'confirmed', color: STAFF_COLORS[1],
-        },
-        {
-            id: '4', title: 'Barba Completa', client: 'Carlos Ruiz', service: 'Barba',
-            staff: 'Carlos', start: new Date(y, m, d, 13, 0), end: new Date(y, m, d, 13, 30),
-            status: 'in_progress', color: STAFF_COLORS[0],
-        },
-        {
-            id: '5', title: 'Corte Fade', client: 'Roberto Díaz', service: 'Corte Fade',
-            staff: 'Miguel', start: new Date(y, m, d, 14, 30), end: new Date(y, m, d, 15, 15),
-            status: 'pending', color: STAFF_COLORS[2],
-        },
-        {
-            id: '6', title: 'Corte + Cejas', client: 'Laura Méndez', service: 'Corte + Cejas',
-            staff: 'Sofía', start: new Date(y, m, d, 15, 0), end: new Date(y, m, d, 15, 45),
-            status: 'confirmed', color: STAFF_COLORS[1],
-        },
-        {
-            id: '7', title: 'Coloración', client: 'Pedro Sánchez', service: 'Coloración',
-            staff: 'Carlos', start: new Date(y, m, d, 16, 0), end: new Date(y, m, d, 17, 30),
-            status: 'confirmed', color: STAFF_COLORS[0],
-        },
-    ];
-
-    // Events for tomorrow
-    const t2 = addDays(referenceDate, 1);
-    const y2 = t2.getFullYear(), m2 = t2.getMonth(), d2 = t2.getDate();
-    events.push(
-        {
-            id: '8', title: 'Corte Express', client: 'Diego Torres', service: 'Corte Express',
-            staff: 'Miguel', start: new Date(y2, m2, d2, 9, 0), end: new Date(y2, m2, d2, 9, 20),
-            status: 'confirmed', color: STAFF_COLORS[2],
-        },
-        {
-            id: '9', title: 'Barba + Masaje', client: 'Andrés Vega', service: 'Barba Premium',
-            staff: 'Sofía', start: new Date(y2, m2, d2, 11, 0), end: new Date(y2, m2, d2, 12, 0),
-            status: 'pending', color: STAFF_COLORS[1],
-        },
-    );
-
-    return events;
-}
+// ─── Constants ────────────────────────────────────────────
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ─── Component ────────────────────────────────────────────
 
 export default function CalendarPage() {
+    const router = useRouter();
     const { t } = useLocale();
+    const { activeBusinessId } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<ViewMode>('day');
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+    const [showWaitlist, setShowWaitlist] = useState(false);
+    const [waitlist, setWaitlist] = useState<any[]>([]);
+    const [eventsList, setEventsList] = useState<CalendarEvent[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const events = useMemo(() => generateMockEvents(new Date()), []);
+    const loadWaitlist = async () => {
+        if (!activeBusinessId) return;
+        try {
+            const res = await fetchWithAuth(`${API_URL}/api/v1/bookings/waitlist/business/${activeBusinessId}`);
+            if (res && res.ok) {
+                const data = await res.json();
+                setWaitlist(data.map((w: any) => ({
+                    id: w.id,
+                    client: w.client ? `${w.client.firstName} ${w.client.lastName || ''}`.trim() : 'Anónimo',
+                    phone: w.client?.phone || '-',
+                    service: w.service?.name || 'Servicio',
+                    addedAt: new Date(w.createdAt),
+                })));
+            }
+        } catch (err) {
+            console.error("Failed to load waitlist", err);
+        }
+    };
+
+    useEffect(() => {
+        async function fetchBookings() {
+            if (!activeBusinessId) return;
+            try {
+                const res = await fetchWithAuth(`${API_URL}/api/v1/bookings/business/${activeBusinessId}`);
+                if (res && res.ok) {
+                    const data = await res.json();
+
+                    const mappedEvents: CalendarEvent[] = data.map((b: any, index: number) => {
+                        const statusMapping: Record<string, CalendarEvent['status']> = {
+                            'PENDING': 'pending',
+                            'CONFIRMED': 'confirmed',
+                            'IN_PROGRESS': 'in_progress',
+                            'COMPLETED': 'completed',
+                            'CANCELLED': 'cancelled',
+                            'NO_SHOW': 'cancelled'
+                        };
+
+                        const staffName = b.staff?.user?.firstName ? `${b.staff.user.firstName} ${b.staff.user.lastName || ''}`.trim() : 'Staff';
+                        const clientName = b.client?.firstName ? `${b.client.firstName} ${b.client.lastName || ''}`.trim() : 'Cliente Anónimo';
+                        const serviceName = b.service?.name || 'Servicio';
+
+                        return {
+                            id: b.id,
+                            title: serviceName,
+                            client: clientName,
+                            service: serviceName,
+                            staff: staffName,
+                            start: new Date(b.startTime),
+                            end: new Date(b.endTime),
+                            status: statusMapping[b.status] || 'pending',
+                            color: STAFF_COLORS[index % STAFF_COLORS.length]
+                        };
+                    });
+
+                    setEventsList(mappedEvents);
+                }
+            } catch (err) {
+                console.error("Failed to load bookings", err);
+            }
+        };
+        fetchBookings();
+        loadWaitlist();
+    }, [activeBusinessId]);
+
+    const refreshBookings = async () => {
+        if (!activeBusinessId) return;
+        try {
+            const res = await fetchWithAuth(`${API_URL}/api/v1/bookings/business/${activeBusinessId}`);
+            if (res && res.ok) {
+                const data = await res.json();
+                const mappedEvents: CalendarEvent[] = data.map((b: any, index: number) => {
+                    const statusMapping: Record<string, CalendarEvent['status']> = {
+                        'PENDING': 'pending',
+                        'CONFIRMED': 'confirmed',
+                        'IN_PROGRESS': 'in_progress',
+                        'COMPLETED': 'completed',
+                        'CANCELLED': 'cancelled',
+                        'NO_SHOW': 'cancelled'
+                    };
+                    const staffName = b.staff?.user?.firstName ? `${b.staff.user.firstName} ${b.staff.user.lastName || ''}`.trim() : 'Staff';
+                    const clientName = b.client?.firstName ? `${b.client.firstName} ${b.client.lastName || ''}`.trim() : 'Cliente Anónimo';
+                    const serviceName = b.service?.name || 'Servicio';
+                    return {
+                        id: b.id,
+                        title: serviceName,
+                        client: clientName,
+                        service: serviceName,
+                        staff: staffName,
+                        start: new Date(b.startTime),
+                        end: new Date(b.endTime),
+                        status: statusMapping[b.status] || 'pending',
+                        color: STAFF_COLORS[index % STAFF_COLORS.length]
+                    };
+                });
+                setEventsList(mappedEvents);
+            }
+        } catch (err) {
+            console.error("Failed to refresh bookings", err);
+        }
+    };
 
     const today = new Date();
 
@@ -249,7 +212,8 @@ export default function CalendarPage() {
             : viewMode === 'week'
                 ? { month: 'long', year: 'numeric' }
                 : { weekday: 'long', day: 'numeric', month: 'long' };
-        return currentDate.toLocaleDateString('es-MX', opts);
+        const formatted = currentDate.toLocaleDateString('es-MX', opts);
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
     }, [currentDate, viewMode]);
 
     // Week days
@@ -265,12 +229,14 @@ export default function CalendarPage() {
 
     // Events for a given day
     const eventsForDay = (day: Date) =>
-        events.filter(e => isSameDay(e.start, day)).sort((a, b) => a.start.getTime() - b.start.getTime());
+        eventsList.filter((e: CalendarEvent) => isSameDay(e.start, day)).sort((a: CalendarEvent, b: CalendarEvent) => a.start.getTime() - b.start.getTime());
+
+    // Pre-calculate Day Layout using pure greedy graph hook
+    const currentDayEvents = useMemo(() => eventsForDay(currentDate), [eventsList, currentDate]);
+    const laidDayEvents = useCalendarLayout(currentDayEvents, START_HOUR, HOUR_HEIGHT);
 
     // ─── Render: Day View ───
     const renderDayView = () => {
-        const dayEvents = eventsForDay(currentDate);
-        const laid = layoutEvents(dayEvents);
         const gridHeight = HOURS.length * HOUR_HEIGHT;
 
         return (
@@ -292,7 +258,7 @@ export default function CalendarPage() {
 
                     {/* Events layer — absolutely positioned over the full grid */}
                     <div className={styles.eventsLayer}>
-                        {laid.map(event => (
+                        {laidDayEvents.map((event: LayoutEvent) => (
                             <button
                                 key={event.id}
                                 className={styles.eventBlock}
@@ -343,10 +309,10 @@ export default function CalendarPage() {
                                 {String(hour).padStart(2, '0')}:00
                             </div>
                             {weekDays.map((day, di) => {
-                                const cellEvents = eventsForDay(day).filter(e => e.start.getHours() === hour);
+                                const cellEvents = eventsForDay(day).filter((e: CalendarEvent) => e.start.getHours() === hour);
                                 return (
                                     <div key={di} className={styles.weekCell}>
-                                        {cellEvents.map(event => (
+                                        {cellEvents.map((event: CalendarEvent) => (
                                             <button
                                                 key={event.id}
                                                 className={styles.weekEvent}
@@ -389,7 +355,7 @@ export default function CalendarPage() {
                                 onClick={() => { setCurrentDate(day); setViewMode('day'); }}
                             >
                                 <span className={styles.monthCellDay}>{day.getDate()}</span>
-                                {dayEvts.slice(0, 3).map(evt => (
+                                {dayEvts.slice(0, 3).map((evt: CalendarEvent) => (
                                     <div
                                         key={evt.id}
                                         className={styles.monthEvent}
@@ -415,10 +381,17 @@ export default function CalendarPage() {
                 title={t('calendar')}
                 subtitle={headerTitle}
                 actions={
-                    <button className="btn btn-primary btn-sm">
-                        + {t('schedule_appointment')}
-                    </button>
+                    <button className="btn btn-primary btn-sm min-h-[44px] min-w-[44px] px-4" onClick={() => setIsModalOpen(true)}>+ Nueva Cita</button>
                 }
+            />
+
+            <NewBookingModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                    refreshBookings();
+                }}
             />
 
             <div className={styles.content}>
@@ -439,17 +412,65 @@ export default function CalendarPage() {
                                 className={`${styles.viewBtn} ${viewMode === mode ? styles.viewActive : ''}`}
                                 onClick={() => setViewMode(mode)}
                             >
-                                {t(mode as any)}
+                                {t(mode as TranslationKey)}
                             </button>
                         ))}
+                        <button
+                            className={`${styles.viewBtn} ${showWaitlist ? styles.waitlistActive : ''}`}
+                            onClick={() => setShowWaitlist(!showWaitlist)}
+                        >
+                            📋 Espera
+                            {waitlist.length > 0 && (
+                                <span className={styles.waitlistBadge}>{waitlist.length}</span>
+                            )}
+                        </button>
                     </div>
                 </div>
 
-                {/* Calendar Body */}
-                <div className={styles.calendarBody}>
-                    {viewMode === 'day' && renderDayView()}
-                    {viewMode === 'week' && renderWeekView()}
-                    {viewMode === 'month' && renderMonthView()}
+                {/* Calendar Body Area */}
+                <div className={styles.calendarLayout}>
+                    <div className={`${styles.calendarBody} ${showWaitlist ? styles.withWaitlist : ''}`}>
+                        {viewMode === 'day' && renderDayView()}
+                        {viewMode === 'week' && renderWeekView()}
+                        {viewMode === 'month' && renderMonthView()}
+                    </div>
+
+                    {showWaitlist && (
+                        <aside className={styles.waitlistPanel}>
+                            <h3 className={styles.waitlistTitle}>Lista de Espera — Hoy</h3>
+                            <p className={styles.waitlistSubtitle}>Clientes listos para tomar un espacio si alguien cancela.</p>
+
+                            <div className={styles.waitlistItems}>
+                                {waitlist.length === 0 ? (
+                                    <div className={styles.emptyWaitlist}>No hay clientes en espera hoy.</div>
+                                ) : (
+                                    waitlist.map(w => (
+                                        <div key={w.id} className={styles.waitlistCard}>
+                                            <div className={styles.wHeader}>
+                                                <div>
+                                                    <span className={styles.wClient}>{w.client}</span>
+                                                    <span className={styles.wPhone}>{w.phone}</span>
+                                                </div>
+                                                <span className={styles.wTime}>{formatTime(w.addedAt)}</span>
+                                            </div>
+                                            <div className={styles.wService}>{w.service}</div>
+                                            <div className={styles.wActions}>
+                                                <a
+                                                    href={`https://wa.me/${w.phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hola ${w.client}, ¡se abrió un espacio para ${w.service} hoy!`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={`btn btn-outline btn-sm ${styles.waBtn}`}
+                                                >
+                                                    💬 WhatsApp
+                                                </a>
+                                                <button className="btn btn-outline btn-sm">📲 Notificar</button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </aside>
+                    )}
                 </div>
 
                 {/* Event Detail Overlay */}
@@ -489,7 +510,7 @@ export default function CalendarPage() {
                                         className={styles.statusDot}
                                         style={{ '--status-color': STATUS_COLORS[selectedEvent.status] } as React.CSSProperties}
                                     >
-                                        {t(selectedEvent.status as any)}
+                                        {t(selectedEvent.status as TranslationKey)}
                                     </span>
                                 </div>
                             </div>
